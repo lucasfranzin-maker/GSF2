@@ -1,4 +1,4 @@
-from fastapi import FastAPI, APIRouter, HTTPException
+from fastapi import FastAPI, APIRouter, HTTPException, Header
 from dotenv import load_dotenv
 from starlette.middleware.cors import CORSMiddleware
 from motor.motor_asyncio import AsyncIOMotorClient
@@ -25,6 +25,7 @@ db = client[os.environ['DB_NAME']]
 RESEND_API_KEY = os.environ.get('RESEND_API_KEY')
 SENDER_EMAIL = os.environ.get('SENDER_EMAIL', 'onboarding@resend.dev')
 CONTACT_RECIPIENT = os.environ.get('CONTACT_RECIPIENT', '')
+ADMIN_TOKEN = os.environ.get('ADMIN_TOKEN', 'gsf-admin-2026')
 if RESEND_API_KEY:
     resend.api_key = RESEND_API_KEY
 
@@ -204,9 +205,19 @@ async def create_contact(payload: ContactCreate):
     return ContactResponse(ok=True, id=contact_id, email_status=email_status)
 
 
+@api_router.post("/admin/login")
+async def admin_login(x_admin_token: str = Header(default="")):
+    """Verify an admin token; used to gate the internal inquiries view."""
+    if x_admin_token != ADMIN_TOKEN:
+        raise HTTPException(status_code=401, detail="Ungültiges Passwort")
+    return {"ok": True}
+
+
 @api_router.get("/contact", response_model=List[dict])
-async def list_contacts():
-    """Simple admin listing of stored inquiries (most recent first)."""
+async def list_contacts(x_admin_token: str = Header(default="")):
+    """Protected admin listing of stored inquiries (most recent first)."""
+    if x_admin_token != ADMIN_TOKEN:
+        raise HTTPException(status_code=401, detail="Nicht autorisiert")
     contacts = await db.contacts.find({}, {"_id": 0}).sort("createdAt", -1).to_list(500)
     return contacts
 

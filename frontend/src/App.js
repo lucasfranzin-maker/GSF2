@@ -11,6 +11,7 @@ import Sortiment from "@/pages/Sortiment";
 import Kontakt from "@/pages/Kontakt";
 import Impressum from "@/pages/Impressum";
 import Datenschutz from "@/pages/Datenschutz";
+import Admin from "@/pages/Admin";
 import NotFound from "@/pages/NotFound";
 
 function App() {
@@ -27,6 +28,7 @@ function App() {
             <Route path="/kontakt" element={<Kontakt />} />
             <Route path="/impressum" element={<Impressum />} />
             <Route path="/datenschutz" element={<Datenschutz />} />
+            <Route path="/admin" element={<Admin />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </Layout>

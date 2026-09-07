@@ -5,7 +5,7 @@ import { RouteMap } from "@/components/RouteMap";
 import { SectionLabel } from "@/components/SectionLabel";
 import { DashedRule } from "@/components/DashedRule";
 import { Reveal } from "@/components/Reveal";
-import { PartnerLogoGrid } from "@/components/PartnerLogos";
+import { PartnerLogoGrid, TesaLogo } from "@/components/PartnerLogos";
 import { ContactCTA } from "@/components/ContactCTA";
 import { useLang } from "@/i18n/LanguageContext";
 
@@ -168,11 +168,7 @@ export default function Home() {
             </Reveal>
             <Reveal className="lg:col-span-5" delay={0.1}>
               <div className="gsf-panel !p-8 flex flex-col items-center text-center gap-5">
-                <svg viewBox="0 0 120 54" width="120" height="54" role="img" aria-label="tesa">
-                  <rect x="6" y="10" width="108" height="34" rx="5" fill="#E2001A" />
-                  <path d="M114 44 L114 30 L100 44 Z" fill="#0A57E0" />
-                  <text x="18" y="37" fontFamily="Arial, sans-serif" fontWeight="700" fontSize="26" fill="#FFFFFF">tesa</text>
-                </svg>
+                <TesaLogo height={54} />
                 <div className="inline-flex items-center gap-2 rounded-full px-4 py-2" style={{ background: "rgba(11,95,255,0.08)" }}>
                   <ShieldCheck size={16} strokeWidth={1.6} style={{ color: "var(--gsf-blue)" }} />
                   <span className="font-mono-tech text-[11px] uppercase tracking-[0.12em]" style={{ color: "var(--gsf-blue)" }}>

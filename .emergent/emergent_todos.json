@@ -1,30 +1,22 @@
 [
   {
-    "content": "Phase 1: Email POC (Resend) - verified",
+    "content": "Europa/Afrika-Karte: korrekte Umrisse (d3-geo world-atlas)",
     "status": "completed"
   },
   {
-    "content": "Design guidelines + build all pages/components",
+    "content": "Partnerlogos als austauschbare Dateien (public/partners/*.svg)",
     "status": "completed"
   },
   {
-    "content": "Backend contact API (store + Resend email)",
+    "content": "Standorte-Seite: eingebettete Karten + Anfahrtslinks (Cape Town, Durban)",
     "status": "completed"
   },
   {
-    "content": "Bilingual DE/EN + SEO + accessibility + responsive",
+    "content": "Geschützte Anfragen-Übersicht (/admin + Token-Schutz)",
     "status": "completed"
   },
   {
-    "content": "Phase 2: End-to-end testing (backend 100%, frontend 96%) + fix sheet issue",
+    "content": "Testing: neue Features via testing_agent_v3 (100% pass)",
     "status": "completed"
-  },
-  {
-    "content": "Repo hygiene: README, .env.example, .gitignore secrets",
-    "status": "completed"
-  },
-  {
-    "content": "GitHub push via Emergent integration (user action)",
-    "status": "in_progress"
   }
 ]

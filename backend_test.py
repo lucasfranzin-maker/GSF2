@@ -169,15 +169,84 @@ class GSFBackendTester:
             self.log_test("POST /api/contact (invalid email → 422)", False, f"Exception: {str(e)}")
             return False
 
-    def test_get_contacts(self):
-        """Test GET /api/contact returns list of stored inquiries"""
-        print("\n🔍 Testing GET /api/contact (list inquiries)...")
+    def test_admin_login_valid(self):
+        """Test POST /api/admin/login with correct token returns {ok:true}"""
+        print("\n🔍 Testing POST /api/admin/login (valid token)...")
         try:
-            response = requests.get(f"{self.api_url}/contact", timeout=10)
+            response = requests.post(
+                f"{self.api_url}/admin/login",
+                headers={"X-Admin-Token": "gsf-admin-2026"},
+                timeout=10
+            )
+            if response.status_code == 200:
+                data = response.json()
+                if data.get("ok") is True:
+                    self.log_test("POST /api/admin/login (valid token → 200)", True, 
+                                f"Response: {data}")
+                    return True
+                else:
+                    self.log_test("POST /api/admin/login (valid token → 200)", False, 
+                                f"Expected ok:true, got: {data}")
+                    return False
+            else:
+                self.log_test("POST /api/admin/login (valid token → 200)", False, 
+                            f"Status {response.status_code}: {response.text}")
+                return False
+        except Exception as e:
+            self.log_test("POST /api/admin/login (valid token → 200)", False, f"Exception: {str(e)}")
+            return False
+
+    def test_admin_login_wrong_token(self):
+        """Test POST /api/admin/login with wrong token returns 401"""
+        print("\n🔍 Testing POST /api/admin/login (wrong token)...")
+        try:
+            response = requests.post(
+                f"{self.api_url}/admin/login",
+                headers={"X-Admin-Token": "wrong-token"},
+                timeout=10
+            )
+            if response.status_code == 401:
+                self.log_test("POST /api/admin/login (wrong token → 401)", True, 
+                            f"Correctly rejected with 401")
+                return True
+            else:
+                self.log_test("POST /api/admin/login (wrong token → 401)", False, 
+                            f"Expected 401, got {response.status_code}")
+                return False
+        except Exception as e:
+            self.log_test("POST /api/admin/login (wrong token → 401)", False, f"Exception: {str(e)}")
+            return False
+
+    def test_admin_login_no_token(self):
+        """Test POST /api/admin/login without token returns 401"""
+        print("\n🔍 Testing POST /api/admin/login (no token)...")
+        try:
+            response = requests.post(f"{self.api_url}/admin/login", timeout=10)
+            if response.status_code == 401:
+                self.log_test("POST /api/admin/login (no token → 401)", True, 
+                            f"Correctly rejected with 401")
+                return True
+            else:
+                self.log_test("POST /api/admin/login (no token → 401)", False, 
+                            f"Expected 401, got {response.status_code}")
+                return False
+        except Exception as e:
+            self.log_test("POST /api/admin/login (no token → 401)", False, f"Exception: {str(e)}")
+            return False
+
+    def test_get_contacts_with_token(self):
+        """Test GET /api/contact with valid token returns list"""
+        print("\n🔍 Testing GET /api/contact (with valid token)...")
+        try:
+            response = requests.get(
+                f"{self.api_url}/contact",
+                headers={"X-Admin-Token": "gsf-admin-2026"},
+                timeout=10
+            )
             if response.status_code == 200:
                 data = response.json()
                 if isinstance(data, list):
-                    self.log_test("GET /api/contact", True, 
+                    self.log_test("GET /api/contact (with token → 200)", True, 
                                 f"Retrieved {len(data)} contact(s)")
                     # Check if most recent first (if we have multiple)
                     if len(data) >= 2:
@@ -189,37 +258,87 @@ class GSFBackendTester:
                             print(f"   ⚠ Warning: Contacts may not be sorted correctly")
                     return True
                 else:
-                    self.log_test("GET /api/contact", False, f"Expected list, got: {type(data)}")
+                    self.log_test("GET /api/contact (with token → 200)", False, 
+                                f"Expected list, got: {type(data)}")
                     return False
             else:
-                self.log_test("GET /api/contact", False, 
+                self.log_test("GET /api/contact (with token → 200)", False, 
                             f"Status {response.status_code}: {response.text}")
                 return False
         except Exception as e:
-            self.log_test("GET /api/contact", False, f"Exception: {str(e)}")
+            self.log_test("GET /api/contact (with token → 200)", False, f"Exception: {str(e)}")
+            return False
+
+    def test_get_contacts_wrong_token(self):
+        """Test GET /api/contact with wrong token returns 401"""
+        print("\n🔍 Testing GET /api/contact (wrong token)...")
+        try:
+            response = requests.get(
+                f"{self.api_url}/contact",
+                headers={"X-Admin-Token": "wrong-token"},
+                timeout=10
+            )
+            if response.status_code == 401:
+                self.log_test("GET /api/contact (wrong token → 401)", True, 
+                            f"Correctly rejected with 401")
+                return True
+            else:
+                self.log_test("GET /api/contact (wrong token → 401)", False, 
+                            f"Expected 401, got {response.status_code}")
+                return False
+        except Exception as e:
+            self.log_test("GET /api/contact (wrong token → 401)", False, f"Exception: {str(e)}")
+            return False
+
+    def test_get_contacts_no_token(self):
+        """Test GET /api/contact without token returns 401"""
+        print("\n🔍 Testing GET /api/contact (no token)...")
+        try:
+            response = requests.get(f"{self.api_url}/contact", timeout=10)
+            if response.status_code == 401:
+                self.log_test("GET /api/contact (no token → 401)", True, 
+                            f"Correctly rejected with 401")
+                return True
+            else:
+                self.log_test("GET /api/contact (no token → 401)", False, 
+                            f"Expected 401, got {response.status_code}")
+                return False
+        except Exception as e:
+            self.log_test("GET /api/contact (no token → 401)", False, f"Exception: {str(e)}")
             return False
 
     def run_all_tests(self):
         """Run all backend tests"""
         print("=" * 70)
-        print("GSF BACKEND API TESTS")
+        print("GSF BACKEND API TESTS (Iteration 2 - New Admin Features)")
         print(f"Testing: {self.base_url}")
         print("=" * 70)
 
         # Test health check
         self.test_health_check()
 
-        # Test valid contact creation
+        # NEW: Test admin login endpoint
+        print("\n--- NEW FEATURE: Admin Login ---")
+        self.test_admin_login_valid()
+        self.test_admin_login_wrong_token()
+        self.test_admin_login_no_token()
+
+        # NEW: Test protected admin contact listing
+        print("\n--- NEW FEATURE: Protected Admin Contact Listing ---")
+        self.test_get_contacts_with_token()
+        self.test_get_contacts_wrong_token()
+        self.test_get_contacts_no_token()
+
+        # REGRESSION: Test contact creation
+        print("\n--- REGRESSION: Contact Creation ---")
         contact_id = self.test_contact_valid()
 
-        # Test validation errors (422)
+        # REGRESSION: Test validation errors (422)
+        print("\n--- REGRESSION: Contact Validation ---")
         self.test_contact_missing_name()
         self.test_contact_missing_company()
         self.test_contact_missing_message()
         self.test_contact_invalid_email()
-
-        # Test listing contacts
-        self.test_get_contacts()
 
         # Summary
         print("\n" + "=" * 70)

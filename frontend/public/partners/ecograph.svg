@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 220 40" width="220" height="40" role="img" aria-label="ECOGRAPH">
+  <g fill="#E2001A">
+    <rect x="2" y="15" width="14" height="4"/>
+    <rect x="7" y="10" width="4" height="14"/>
+  </g>
+  <text x="20" y="28" font-family="Arial, sans-serif" font-weight="800" font-size="26" fill="#E2001A">ECO</text>
+  <text x="96" y="28" font-family="Arial, sans-serif" font-weight="800" font-size="26" fill="#5B6673">GRAPH</text>
+</svg>

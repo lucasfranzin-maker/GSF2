@@ -4,6 +4,7 @@ import { ArrowRight, ShieldCheck, Layers, Boxes, Truck, Wrench } from "lucide-re
 import { PageHeader } from "@/components/PageHeader";
 import { Reveal } from "@/components/Reveal";
 import { DashedRule } from "@/components/DashedRule";
+import { TesaLogo } from "@/components/PartnerLogos";
 import { useLang } from "@/i18n/LanguageContext";
 
 const APP_ICONS = [Layers, Wrench, ShieldCheck, Truck];
@@ -19,11 +20,7 @@ export default function Tesa() {
         <div className="gsf-container">
           <Reveal>
             <div className="gsf-panel !p-8 md:!p-10 flex flex-col sm:flex-row items-center gap-8" style={{ background: "var(--gsf-surface-2)" }}>
-              <svg viewBox="0 0 120 54" width="120" height="54" role="img" aria-label="tesa" className="shrink-0">
-                <rect x="6" y="10" width="108" height="34" rx="5" fill="#E2001A" />
-                <path d="M114 44 L114 30 L100 44 Z" fill="#0A57E0" />
-                <text x="18" y="37" fontFamily="Arial, sans-serif" fontWeight="700" fontSize="26" fill="#FFFFFF">tesa</text>
-              </svg>
+              <TesaLogo height={54} className="shrink-0" />
               <div className="flex items-center gap-3">
                 <ShieldCheck size={22} strokeWidth={1.6} style={{ color: "var(--gsf-blue)" }} />
                 <span className="font-head uppercase text-lg sm:text-xl tracking-wide" style={{ color: "var(--gsf-ink)" }}>{t.tesa.badge}</span>

@@ -1,0 +1,189 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    /* GSF brand tokens */
+    --gsf-bg: #F6F8FA;
+    --gsf-surface: #FFFFFF;
+    --gsf-surface-2: #F2F5F8;
+
+    --gsf-ink: #0B1B33;
+    --gsf-ink-2: #1A2436;
+    --gsf-muted: #6B7787;
+
+    --gsf-border: #CBD3DC;
+    --gsf-border-2: #D9E0E7;
+
+    --gsf-blue: #0B5FFF;
+    --gsf-blue-2: #0A57E0;
+
+    --gsf-teal: #22C3A6;
+    --gsf-violet: #8A6BF0;
+    --gsf-yellow: #FFCF3A;
+
+    --gsf-focus: #0B5FFF;
+    --gsf-danger: #B42318;
+    --gsf-success: #067647;
+
+    /* shadcn token mapping -> GSF palette */
+    --background: 210 33% 98%;
+    --foreground: 216 65% 12%;
+    --card: 0 0% 100%;
+    --card-foreground: 216 65% 12%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 216 65% 12%;
+    --primary: 217 100% 52%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 210 25% 96%;
+    --secondary-foreground: 216 65% 12%;
+    --muted: 210 25% 96%;
+    --muted-foreground: 215 16% 45%;
+    --accent: 210 25% 96%;
+    --accent-foreground: 216 65% 12%;
+    --destructive: 5 78% 40%;
+    --destructive-foreground: 0 0% 100%;
+    --border: 214 20% 83%;
+    --input: 214 20% 83%;
+    --ring: 217 100% 52%;
+    --radius: 0.75rem;
+  }
+}
+
+@layer base {
+  * {
+    border-color: hsl(var(--border));
+  }
+  html {
+    scroll-behavior: smooth;
+  }
+  body {
+    margin: 0;
+    background-color: var(--gsf-bg);
+    color: var(--gsf-ink);
+    font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+  ::selection {
+    background: var(--gsf-blue);
+    color: #fff;
+  }
+}
+
+@layer components {
+  .gsf-container {
+    @apply max-w-6xl xl:max-w-7xl mx-auto px-5 sm:px-6 lg:px-10;
+  }
+  .gsf-section {
+    @apply py-14 md:py-20 lg:py-24;
+  }
+  .font-head {
+    font-family: "Roboto Condensed", "Arial Narrow", system-ui, sans-serif;
+  }
+  .font-mono-tech {
+    font-family: "IBM Plex Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+  }
+  .gsf-h1 {
+    @apply font-head uppercase font-bold leading-[0.95] tracking-[0.01em] text-4xl sm:text-5xl lg:text-[64px];
+    color: var(--gsf-ink);
+  }
+  .gsf-h2 {
+    @apply font-head uppercase font-bold leading-[1.02] tracking-[0.01em] text-3xl sm:text-4xl lg:text-[44px];
+    color: var(--gsf-ink);
+  }
+  .gsf-h3 {
+    @apply font-head uppercase font-bold leading-tight tracking-[0.01em] text-lg sm:text-xl;
+    color: var(--gsf-ink);
+  }
+  .gsf-kicker {
+    @apply font-mono-tech text-[11px] sm:text-xs font-medium tracking-[0.22em] uppercase;
+    color: var(--gsf-muted);
+  }
+  .gsf-body {
+    @apply text-[15px] sm:text-base leading-relaxed;
+    color: var(--gsf-ink-2);
+  }
+  .gsf-muted {
+    color: var(--gsf-muted);
+  }
+  .gsf-btn-primary {
+    @apply inline-flex items-center justify-center gap-2.5 rounded-[8px] px-6 py-3.5 text-sm font-semibold uppercase tracking-wide text-white transition-colors duration-150;
+    background-color: var(--gsf-blue);
+    font-family: "Roboto Condensed", sans-serif;
+    letter-spacing: 0.06em;
+  }
+  .gsf-btn-primary:hover {
+    background-color: var(--gsf-blue-2);
+  }
+  .gsf-btn-secondary {
+    @apply inline-flex items-center justify-center gap-2.5 rounded-[8px] border px-6 py-3.5 text-sm font-semibold uppercase tracking-wide transition-colors duration-150 bg-white;
+    border-color: var(--gsf-border);
+    color: var(--gsf-ink);
+    font-family: "Roboto Condensed", sans-serif;
+    letter-spacing: 0.06em;
+  }
+  .gsf-btn-secondary:hover {
+    border-color: var(--gsf-ink);
+  }
+  .gsf-link {
+    @apply inline-flex items-center gap-2 text-xs sm:text-sm font-semibold uppercase tracking-[0.12em] transition-colors duration-150;
+    color: var(--gsf-ink);
+    font-family: "Roboto Condensed", sans-serif;
+  }
+  .gsf-link:hover {
+    color: var(--gsf-blue);
+  }
+  .gsf-link:hover .gsf-arrow {
+    transform: translateX(3px);
+  }
+  .gsf-arrow {
+    transition: transform 160ms ease;
+  }
+  .gsf-panel {
+    @apply rounded-[12px] border bg-white p-6 transition-colors duration-150;
+    border-color: var(--gsf-border);
+  }
+  .gsf-focus-ring:focus-visible,
+  a:focus-visible,
+  button:focus-visible,
+  input:focus-visible,
+  textarea:focus-visible,
+  select:focus-visible,
+  [tabindex]:focus-visible {
+    outline: none;
+    box-shadow: 0 0 0 2px #fff, 0 0 0 4px var(--gsf-focus);
+    border-radius: 4px;
+  }
+}
+
+/* Dashed rule used across sections */
+.gsf-nav-active::after,
+.gsf-navlink::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: -6px;
+  height: 2px;
+  background: var(--gsf-blue);
+}
+.gsf-dashed {
+  height: 1px;
+  width: 100%;
+  background-image: linear-gradient(to right, var(--gsf-border) 0 6px, transparent 6px 12px);
+  background-size: 12px 1px;
+  background-repeat: repeat-x;
+}
+.gsf-dashed-v {
+  width: 1px;
+  background-image: linear-gradient(to bottom, var(--gsf-border) 0 6px, transparent 6px 12px);
+  background-size: 1px 12px;
+  background-repeat: repeat-y;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  * { animation: none !important; transition: none !important; }
+}

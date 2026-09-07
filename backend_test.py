@@ -1,0 +1,242 @@
+#!/usr/bin/env python3
+"""
+Backend API tests for GSF – Grafik Service Franzin
+Tests all /api endpoints using the public preview URL
+"""
+import requests
+import sys
+from datetime import datetime
+
+class GSFBackendTester:
+    def __init__(self, base_url="https://distribution-de.preview.emergentagent.com"):
+        self.base_url = base_url
+        self.api_url = f"{base_url}/api"
+        self.tests_run = 0
+        self.tests_passed = 0
+        self.test_results = []
+
+    def log_test(self, name, passed, details=""):
+        """Log test result"""
+        self.tests_run += 1
+        if passed:
+            self.tests_passed += 1
+            print(f"✅ PASS: {name}")
+        else:
+            print(f"❌ FAIL: {name}")
+        if details:
+            print(f"   {details}")
+        self.test_results.append({"name": name, "passed": passed, "details": details})
+
+    def test_health_check(self):
+        """Test GET /api/ returns online message"""
+        print("\n🔍 Testing GET /api/ (health check)...")
+        try:
+            response = requests.get(f"{self.api_url}/", timeout=10)
+            if response.status_code == 200:
+                data = response.json()
+                if "message" in data and "online" in data["message"].lower():
+                    self.log_test("GET /api/ health check", True, f"Response: {data}")
+                    return True
+                else:
+                    self.log_test("GET /api/ health check", False, f"Unexpected response: {data}")
+                    return False
+            else:
+                self.log_test("GET /api/ health check", False, f"Status {response.status_code}: {response.text}")
+                return False
+        except Exception as e:
+            self.log_test("GET /api/ health check", False, f"Exception: {str(e)}")
+            return False
+
+    def test_contact_valid(self):
+        """Test POST /api/contact with valid payload"""
+        print("\n🔍 Testing POST /api/contact (valid payload)...")
+        timestamp = datetime.now().strftime("%H%M%S")
+        payload = {
+            "name": f"Test User {timestamp}",
+            "company": f"Test Company {timestamp}",
+            "email": f"test{timestamp}@example.com",
+            "phone": "+27 21 555 1234",
+            "location": "Cape Town",
+            "subject": "Test inquiry",
+            "message": "This is a test message from automated testing.",
+            "lang": "de"
+        }
+        try:
+            response = requests.post(f"{self.api_url}/contact", json=payload, timeout=15)
+            if response.status_code == 200:
+                data = response.json()
+                if data.get("ok") and "id" in data and "email_status" in data:
+                    self.log_test("POST /api/contact (valid)", True, 
+                                f"Created contact ID: {data['id']}, email_status: {data['email_status']}")
+                    return data["id"]
+                else:
+                    self.log_test("POST /api/contact (valid)", False, f"Missing fields in response: {data}")
+                    return None
+            else:
+                self.log_test("POST /api/contact (valid)", False, 
+                            f"Status {response.status_code}: {response.text}")
+                return None
+        except Exception as e:
+            self.log_test("POST /api/contact (valid)", False, f"Exception: {str(e)}")
+            return None
+
+    def test_contact_missing_name(self):
+        """Test POST /api/contact with missing name (should return 422)"""
+        print("\n🔍 Testing POST /api/contact (missing name)...")
+        payload = {
+            "company": "Test Company",
+            "email": "test@example.com",
+            "message": "Test message"
+        }
+        try:
+            response = requests.post(f"{self.api_url}/contact", json=payload, timeout=10)
+            if response.status_code == 422:
+                self.log_test("POST /api/contact (missing name → 422)", True, 
+                            f"Correctly rejected with 422")
+                return True
+            else:
+                self.log_test("POST /api/contact (missing name → 422)", False, 
+                            f"Expected 422, got {response.status_code}")
+                return False
+        except Exception as e:
+            self.log_test("POST /api/contact (missing name → 422)", False, f"Exception: {str(e)}")
+            return False
+
+    def test_contact_missing_company(self):
+        """Test POST /api/contact with missing company (should return 422)"""
+        print("\n🔍 Testing POST /api/contact (missing company)...")
+        payload = {
+            "name": "Test User",
+            "email": "test@example.com",
+            "message": "Test message"
+        }
+        try:
+            response = requests.post(f"{self.api_url}/contact", json=payload, timeout=10)
+            if response.status_code == 422:
+                self.log_test("POST /api/contact (missing company → 422)", True, 
+                            f"Correctly rejected with 422")
+                return True
+            else:
+                self.log_test("POST /api/contact (missing company → 422)", False, 
+                            f"Expected 422, got {response.status_code}")
+                return False
+        except Exception as e:
+            self.log_test("POST /api/contact (missing company → 422)", False, f"Exception: {str(e)}")
+            return False
+
+    def test_contact_missing_message(self):
+        """Test POST /api/contact with missing message (should return 422)"""
+        print("\n🔍 Testing POST /api/contact (missing message)...")
+        payload = {
+            "name": "Test User",
+            "company": "Test Company",
+            "email": "test@example.com"
+        }
+        try:
+            response = requests.post(f"{self.api_url}/contact", json=payload, timeout=10)
+            if response.status_code == 422:
+                self.log_test("POST /api/contact (missing message → 422)", True, 
+                            f"Correctly rejected with 422")
+                return True
+            else:
+                self.log_test("POST /api/contact (missing message → 422)", False, 
+                            f"Expected 422, got {response.status_code}")
+                return False
+        except Exception as e:
+            self.log_test("POST /api/contact (missing message → 422)", False, f"Exception: {str(e)}")
+            return False
+
+    def test_contact_invalid_email(self):
+        """Test POST /api/contact with invalid email (should return 422)"""
+        print("\n🔍 Testing POST /api/contact (invalid email)...")
+        payload = {
+            "name": "Test User",
+            "company": "Test Company",
+            "email": "not-an-email",
+            "message": "Test message"
+        }
+        try:
+            response = requests.post(f"{self.api_url}/contact", json=payload, timeout=10)
+            if response.status_code == 422:
+                self.log_test("POST /api/contact (invalid email → 422)", True, 
+                            f"Correctly rejected with 422")
+                return True
+            else:
+                self.log_test("POST /api/contact (invalid email → 422)", False, 
+                            f"Expected 422, got {response.status_code}")
+                return False
+        except Exception as e:
+            self.log_test("POST /api/contact (invalid email → 422)", False, f"Exception: {str(e)}")
+            return False
+
+    def test_get_contacts(self):
+        """Test GET /api/contact returns list of stored inquiries"""
+        print("\n🔍 Testing GET /api/contact (list inquiries)...")
+        try:
+            response = requests.get(f"{self.api_url}/contact", timeout=10)
+            if response.status_code == 200:
+                data = response.json()
+                if isinstance(data, list):
+                    self.log_test("GET /api/contact", True, 
+                                f"Retrieved {len(data)} contact(s)")
+                    # Check if most recent first (if we have multiple)
+                    if len(data) >= 2:
+                        first_date = data[0].get("createdAt", "")
+                        second_date = data[1].get("createdAt", "")
+                        if first_date >= second_date:
+                            print(f"   ✓ Contacts sorted correctly (most recent first)")
+                        else:
+                            print(f"   ⚠ Warning: Contacts may not be sorted correctly")
+                    return True
+                else:
+                    self.log_test("GET /api/contact", False, f"Expected list, got: {type(data)}")
+                    return False
+            else:
+                self.log_test("GET /api/contact", False, 
+                            f"Status {response.status_code}: {response.text}")
+                return False
+        except Exception as e:
+            self.log_test("GET /api/contact", False, f"Exception: {str(e)}")
+            return False
+
+    def run_all_tests(self):
+        """Run all backend tests"""
+        print("=" * 70)
+        print("GSF BACKEND API TESTS")
+        print(f"Testing: {self.base_url}")
+        print("=" * 70)
+
+        # Test health check
+        self.test_health_check()
+
+        # Test valid contact creation
+        contact_id = self.test_contact_valid()
+
+        # Test validation errors (422)
+        self.test_contact_missing_name()
+        self.test_contact_missing_company()
+        self.test_contact_missing_message()
+        self.test_contact_invalid_email()
+
+        # Test listing contacts
+        self.test_get_contacts()
+
+        # Summary
+        print("\n" + "=" * 70)
+        print(f"📊 TEST SUMMARY: {self.tests_passed}/{self.tests_run} tests passed")
+        print("=" * 70)
+
+        if self.tests_passed == self.tests_run:
+            print("✅ All backend tests passed!")
+            return 0
+        else:
+            print(f"❌ {self.tests_run - self.tests_passed} test(s) failed")
+            return 1
+
+def main():
+    tester = GSFBackendTester()
+    exit_code = tester.run_all_tests()
+    sys.exit(exit_code)
+
+if __name__ == "__main__":
+    main()

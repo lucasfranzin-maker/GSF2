@@ -1,0 +1,216 @@
+import React, { useState } from "react";
+import axios from "axios";
+import { Mail, Phone, MapPin, Printer, ArrowRight, CheckCircle2, Building2 } from "lucide-react";
+import { toast } from "sonner";
+import { PageHeader } from "@/components/PageHeader";
+import { Reveal } from "@/components/Reveal";
+import { DashedRule } from "@/components/DashedRule";
+import { useLang } from "@/i18n/LanguageContext";
+import { LOCATIONS_CONTACT } from "@/i18n/translations";
+
+const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
+const API = `${BACKEND_URL}/api`;
+
+const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+export default function Kontakt() {
+  const { t, lang } = useLang();
+  const p = t.pages.kontakt;
+  const f = p.form;
+
+  const [form, setForm] = useState({ name: "", company: "", email: "", phone: "", location: "", subject: "", message: "" });
+  const [errors, setErrors] = useState({});
+  const [submitting, setSubmitting] = useState(false);
+  const [success, setSuccess] = useState(false);
+
+  const setField = (k) => (e) => {
+    setForm((prev) => ({ ...prev, [k]: e.target.value }));
+    setErrors((prev) => ({ ...prev, [k]: undefined }));
+  };
+
+  const validate = () => {
+    const next = {};
+    if (!form.name.trim()) next.name = true;
+    if (!form.company.trim()) next.company = true;
+    if (!form.email.trim() || !EMAIL_RE.test(form.email)) next.email = form.email.trim() ? "email" : true;
+    if (!form.message.trim()) next.message = true;
+    setErrors(next);
+    return Object.keys(next).length === 0;
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    if (!validate()) {
+      toast.error(f.errorRequired);
+      return;
+    }
+    setSubmitting(true);
+    try {
+      await axios.post(`${API}/contact`, { ...form, lang });
+      setSuccess(true);
+      toast.success(f.successTitle);
+      setForm({ name: "", company: "", email: "", phone: "", location: "", subject: "", message: "" });
+    } catch (err) {
+      console.error("contact submit failed", err);
+      toast.error(f.errorSend);
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  const inputBase = "w-full rounded-[8px] border bg-white px-4 py-3 text-[15px] transition-colors duration-150 outline-none";
+  const inputStyle = (invalid) => ({ borderColor: invalid ? "var(--gsf-danger)" : "var(--gsf-border)", color: "var(--gsf-ink)" });
+  const labelCls = "block font-mono-tech text-[11px] uppercase tracking-[0.16em] mb-2";
+
+  const Field = ({ id, k, type = "text", required, half }) => (
+    <div className={half ? "" : "sm:col-span-2"}>
+      <label htmlFor={id} className={labelCls} style={{ color: "var(--gsf-muted)" }}>
+        {f[k]} {required ? <span style={{ color: "var(--gsf-danger)" }}>*</span> : null}
+      </label>
+      <input
+        id={id}
+        type={type}
+        value={form[k]}
+        onChange={setField(k)}
+        className={inputBase}
+        style={inputStyle(errors[k])}
+        data-testid={`contact-form-${k}-input`}
+        aria-invalid={!!errors[k]}
+        aria-required={!!required}
+      />
+      {errors[k] === "email" ? <p className="mt-1.5 text-xs" style={{ color: "var(--gsf-danger)" }}>{f.errorEmail}</p> : null}
+    </div>
+  );
+
+  return (
+    <>
+      <PageHeader label={p.label} icon={Mail} headline={p.headline} intro={p.intro} />
+
+      <section className="gsf-section pt-8">
+        <div className="gsf-container grid grid-cols-1 lg:grid-cols-12 gap-12">
+          {/* Form */}
+          <div className="lg:col-span-7">
+            {success ? (
+              <Reveal>
+                <div className="gsf-panel !p-10 flex flex-col items-start gap-5" data-testid="contact-form-success-message">
+                  <CheckCircle2 size={40} strokeWidth={1.4} style={{ color: "var(--gsf-success)" }} />
+                  <h2 className="gsf-h2">{f.successTitle}</h2>
+                  <p className="gsf-body max-w-md">{f.successText}</p>
+                  <button type="button" className="gsf-link mt-2" onClick={() => setSuccess(false)} data-testid="contact-form-reset-button">
+                    {f.another}
+                    <ArrowRight size={15} strokeWidth={2} className="gsf-arrow" />
+                  </button>
+                </div>
+              </Reveal>
+            ) : (
+              <form onSubmit={handleSubmit} noValidate className="gsf-panel !p-6 sm:!p-8" data-testid="contact-form">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+                  <Field id="cf-name" k="name" required half />
+                  <Field id="cf-company" k="company" required half />
+                  <Field id="cf-email" k="email" type="email" required half />
+                  <Field id="cf-phone" k="phone" half />
+
+                  <div className="">
+                    <label htmlFor="cf-location" className={labelCls} style={{ color: "var(--gsf-muted)" }}>{f.location}</label>
+                    <select
+                      id="cf-location"
+                      value={form.location}
+                      onChange={setField("location")}
+                      className={inputBase}
+                      style={inputStyle(false)}
+                      data-testid="contact-form-location-select"
+                    >
+                      <option value="">{f.locationPlaceholder}</option>
+                      {f.locationOptions.map((o) => (
+                        <option key={o} value={o}>{o}</option>
+                      ))}
+                    </select>
+                  </div>
+
+                  <Field id="cf-subject" k="subject" half />
+
+                  <div className="sm:col-span-2">
+                    <label htmlFor="cf-message" className={labelCls} style={{ color: "var(--gsf-muted)" }}>
+                      {f.message} <span style={{ color: "var(--gsf-danger)" }}>*</span>
+                    </label>
+                    <textarea
+                      id="cf-message"
+                      rows={6}
+                      value={form.message}
+                      onChange={setField("message")}
+                      className={inputBase + " resize-y"}
+                      style={inputStyle(errors.message)}
+                      data-testid="contact-form-message-textarea"
+                      aria-invalid={!!errors.message}
+                      aria-required
+                    />
+                  </div>
+                </div>
+
+                <div className="mt-7 flex items-center gap-5">
+                  <button type="submit" className="gsf-btn-primary" disabled={submitting} data-testid="contact-form-submit-button">
+                    {submitting ? f.sending : f.submit}
+                    {!submitting && <ArrowRight size={16} strokeWidth={2} className="gsf-arrow" />}
+                  </button>
+                  <span className="font-mono-tech text-[11px]" style={{ color: "var(--gsf-muted)" }}>* {f.required}</span>
+                </div>
+              </form>
+            )}
+          </div>
+
+          {/* Direct contact */}
+          <div className="lg:col-span-5">
+            <div className="gsf-kicker mb-6">{p.directTitle}</div>
+            <div className="flex flex-col gap-6">
+              <ContactBlock
+                icon={Building2}
+                title={`Cape Town · ${t.common.headOffice}`}
+                lines={["Grafik Service Franzin (Pty) Ltd.", "4 School Street, Unit 96", "Platinum Junction Business Park", "Milnerton 7441, Cape Town, South Africa"]}
+              />
+              <DashedRule />
+              <ContactBlock
+                icon={Building2}
+                title={`Durban · ${t.common.branchOffice}`}
+                lines={["Grafik Service Franzin (Pty) Ltd.", "73 Nguni Way Rd, Unit 53", "Acacia Business Park", "Hillcrest 3610, Durban, South Africa"]}
+              />
+              <DashedRule />
+              <div className="flex flex-col gap-2.5">
+                <a href={`tel:${LOCATIONS_CONTACT.phoneCapeTown.replace(/[^+\d]/g, "")}`} className="flex items-center gap-3 gsf-body hover:text-[color:var(--gsf-blue)] transition-colors" data-testid="contact-phone-sa">
+                  <Phone size={16} strokeWidth={1.6} style={{ color: "var(--gsf-blue)" }} /> {LOCATIONS_CONTACT.phoneCapeTown}
+                </a>
+                <div className="flex items-center gap-3 gsf-body">
+                  <Printer size={16} strokeWidth={1.6} style={{ color: "var(--gsf-blue)" }} /> {LOCATIONS_CONTACT.faxCapeTown}
+                </div>
+                <a href={`mailto:${LOCATIONS_CONTACT.emailSales}`} className="flex items-center gap-3 gsf-body hover:text-[color:var(--gsf-blue)] transition-colors" data-testid="contact-email-sales">
+                  <Mail size={16} strokeWidth={1.6} style={{ color: "var(--gsf-blue)" }} /> {LOCATIONS_CONTACT.emailSales}
+                </a>
+                <a href={`mailto:${LOCATIONS_CONTACT.emailInfo}`} className="flex items-center gap-3 gsf-body hover:text-[color:var(--gsf-blue)] transition-colors" data-testid="contact-email-info">
+                  <Mail size={16} strokeWidth={1.6} style={{ color: "var(--gsf-blue)" }} /> {LOCATIONS_CONTACT.emailInfo}
+                </a>
+              </div>
+              <DashedRule />
+              <div className="flex items-start gap-3 gsf-body text-sm">
+                <MapPin size={16} strokeWidth={1.6} style={{ color: "var(--gsf-blue)" }} className="mt-0.5" />
+                <span>{lang === "de" ? "Deutschland (vertreten durch):" : "Germany (represented by):"} {LOCATIONS_CONTACT.managingDirector}, Linnthun 12, 25578 Dägeling · {LOCATIONS_CONTACT.phoneGermany}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+    </>
+  );
+}
+
+const ContactBlock = ({ icon: Icon, title, lines }) => (
+  <div className="flex items-start gap-3">
+    <Icon size={18} strokeWidth={1.5} style={{ color: "var(--gsf-blue)" }} className="mt-0.5 shrink-0" />
+    <div>
+      <div className="gsf-h3 text-sm">{title}</div>
+      <div className="mt-1.5 flex flex-col gap-0.5">
+        {lines.map((l, i) => (
+          <span key={i} className="gsf-body text-[13px] leading-snug">{l}</span>
+        ))}
+      </div>
+    </div>
+  </div>
+);

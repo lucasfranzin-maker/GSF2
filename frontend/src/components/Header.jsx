@@ -22,6 +22,7 @@ export const Header = () => {
     { to: "/standorte", label: t.nav.standorte },
     { to: "/tesa", label: t.nav.tesa },
     { to: "/sortiment", label: t.nav.sortiment },
+    { to: "/projekte", label: t.nav.projekte },
     { to: "/ueber-gsf", label: t.nav.ueber },
     { to: "/kontakt", label: t.nav.kontakt },
   ];

@@ -8,6 +8,7 @@ import UeberGsf from "@/pages/UeberGsf";
 import Standorte from "@/pages/Standorte";
 import Tesa from "@/pages/Tesa";
 import Sortiment from "@/pages/Sortiment";
+import Projekte from "@/pages/Projekte";
 import Kontakt from "@/pages/Kontakt";
 import Impressum from "@/pages/Impressum";
 import Datenschutz from "@/pages/Datenschutz";
@@ -25,6 +26,7 @@ function App() {
             <Route path="/standorte" element={<Standorte />} />
             <Route path="/tesa" element={<Tesa />} />
             <Route path="/sortiment" element={<Sortiment />} />
+            <Route path="/projekte" element={<Projekte />} />
             <Route path="/kontakt" element={<Kontakt />} />
             <Route path="/impressum" element={<Impressum />} />
             <Route path="/datenschutz" element={<Datenschutz />} />

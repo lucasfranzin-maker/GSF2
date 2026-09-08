@@ -8,6 +8,7 @@ export const translations = {
       standorte: "Standorte",
       tesa: "tesa Partnerschaft",
       sortiment: "Sortiment",
+      projekte: "Projekte",
       ueber: "Über GSF",
       kontakt: "Kontakt",
       home: "Startseite",
@@ -138,6 +139,35 @@ export const translations = {
           { title: "Persönlicher Kundenservice", text: "Betreuung vor Ort in Cape Town, Durban und darüber hinaus." },
         ],
         quote: "Deutsche technische Präzision trifft internationale Distribution.",
+        storyLabel: "Unsere Geschichte",
+        storyParagraphs: [
+          "GSF – Grafik Service Franzin verbindet deutsche Hersteller und technische Lösungen mit Kunden in Südafrika. Aus der engen Verbindung zwischen unserem Standort in Dägeling bei Hamburg und unseren Teams in Cape Town und Durban ist ein Unternehmen entstanden, das deutsche Qualität direkt vor Ort erlebbar macht.",
+          "Als alleiniger tesa Alliance Partner in Südafrika haben wir unser Sortiment kontinuierlich um technische Lösungen für die grafische Industrie und den industriellen Einsatz erweitert. Im Mittelpunkt steht dabei immer die persönliche, technische Beratung unserer Kunden – vom ersten Kontakt bis zur laufenden Betreuung vor Ort.",
+        ],
+        teamLabel: "Unser Team",
+        teamIntro: "Auf beiden Seiten der Lieferkette – in Deutschland und Südafrika – sorgt unser Team für kurze Wege und persönliche Ansprechpartner.",
+        team: [
+          {
+            role: "Geschäftsführung",
+            name: "Michael Franzin",
+            text: "Verantwortlich für Strategie, Lieferantenbeziehungen in Deutschland und die Verbindung zwischen beiden Standorten.",
+          },
+          {
+            role: "Vertrieb & Kundenbetreuung Südafrika",
+            name: "",
+            text: "Persönliche Beratung und Betreuung unserer Kunden in Cape Town, Durban und im Vertriebsgebiet Johannesburg.",
+          },
+          {
+            role: "Logistik & Beschaffung",
+            name: "",
+            text: "Koordination der Lieferketten und Sendungen zwischen Deutschland und Südafrika.",
+          },
+          {
+            role: "Technische Beratung",
+            name: "",
+            text: "Unterstützung bei der Auswahl und Anwendung unserer tesa Lösungen und Produkte für die grafische Industrie.",
+          },
+        ],
       },
       standorte: {
         label: "Standorte",
@@ -193,6 +223,44 @@ export const translations = {
         headline: ["Technische Lösungen", "für professionelle Prozesse."],
         intro: "Unser Sortiment richtet sich an Druckereien, industrielle Anwender und Handelspartner. Statt Standardware bieten wir technische Lösungen mit persönlicher Beratung.",
       },
+      projekte: {
+        label: "Projekte",
+        headline: ["Beispiele aus unserer", "praktischen Arbeit."],
+        intro: "Diese Projektbeispiele zeigen typische Aufgaben, bei denen wir Kunden in der grafischen Industrie und im industriellen Umfeld unterstützen – von der technischen Beratung bis zur Umsetzung vor Ort.",
+        note: "Hinweis: Diese Seite ist mit beispielhaften Projekttypen vorbefüllt. Bitte durch reale, freigegebene Kundenprojekte ersetzen, bevor die Seite veröffentlicht wird.",
+        items: [
+          {
+            category: "Grafische Industrie",
+            title: "Farbmanagement-Rollout für Verpackungsdruck",
+            text: "Einführung eines konsistenten Farbmanagement-Workflows für einen Verpackungsdruckbetrieb – von der Farbmessung bis zur Druckfreigabe.",
+          },
+          {
+            category: "tesa Lösungen",
+            title: "Klebebandlösung für eine Fertigungslinie",
+            text: "Auswahl und Einführung einer technischen tesa Klebebandlösung für eine industrielle Fertigungslinie, inklusive Beratung vor Ort.",
+          },
+          {
+            category: "Distribution",
+            title: "Beschaffungskette Deutschland–Südafrika",
+            text: "Aufbau einer planbaren Lieferkette für technische Produkte aus Deutschland mit verlässlichen Lieferzeiten für Kunden in Cape Town, Durban und Johannesburg.",
+          },
+          {
+            category: "Industrie",
+            title: "Ausstattung einer neuen Produktionslinie",
+            text: "Zusammenstellung eines technischen Produktpakets zur Inbetriebnahme einer neuen Produktionslinie.",
+          },
+          {
+            category: "Grafische Industrie",
+            title: "Umstellung auf ressourcenschonendere Materialien",
+            text: "Beratung zu umweltfreundlicheren Alternativen im Druckvorstufen- und Produktionsprozess.",
+          },
+          {
+            category: "Distribution",
+            title: "Vertriebsausweitung Gauteng",
+            text: "Aufbau der Vertriebsaktivitäten in der Region Johannesburg, um Kunden dort direkt betreuen zu können.",
+          },
+        ],
+      },
       kontakt: {
         label: "Kontakt",
         headline: ["Kontakt aufnehmen."],
@@ -228,6 +296,7 @@ export const translations = {
       standorte: "Locations",
       tesa: "tesa Partnership",
       sortiment: "Range",
+      projekte: "Projects",
       ueber: "About GSF",
       kontakt: "Contact",
       home: "Home",
@@ -358,6 +427,35 @@ export const translations = {
           { title: "Personal customer service", text: "On-site care in Cape Town, Durban and beyond." },
         ],
         quote: "German technical precision meets international distribution.",
+        storyLabel: "Our story",
+        storyParagraphs: [
+          "GSF – Grafik Service Franzin connects German manufacturers and technical solutions with customers in South Africa. Out of the close connection between our base in Dägeling near Hamburg and our teams in Cape Town and Durban, a company has grown that brings German quality directly on the ground.",
+          "As the sole tesa Alliance Partner in South Africa, we have continuously expanded our range with technical solutions for the graphic industry and industrial use. Personal, technical consulting for our customers always remains at the centre – from first contact through to ongoing on-site support.",
+        ],
+        teamLabel: "Our team",
+        teamIntro: "On both sides of the supply chain – in Germany and South Africa – our team keeps the lines short and personal.",
+        team: [
+          {
+            role: "Management",
+            name: "Michael Franzin",
+            text: "Responsible for strategy, supplier relationships in Germany and the connection between both locations.",
+          },
+          {
+            role: "Sales & customer care South Africa",
+            name: "",
+            text: "Personal consulting and care for our customers in Cape Town, Durban and the Johannesburg sales area.",
+          },
+          {
+            role: "Logistics & procurement",
+            name: "",
+            text: "Coordinating supply chains and shipments between Germany and South Africa.",
+          },
+          {
+            role: "Technical consulting",
+            name: "",
+            text: "Support in selecting and applying our tesa solutions and products for the graphic industry.",
+          },
+        ],
       },
       standorte: {
         label: "Locations",
@@ -412,6 +510,44 @@ export const translations = {
         label: "Range",
         headline: ["Technical solutions", "for professional processes."],
         intro: "Our range is aimed at printers, industrial users and trade partners. Instead of commodity goods, we offer technical solutions with personal consulting.",
+      },
+      projekte: {
+        label: "Projects",
+        headline: ["Examples from our", "day-to-day work."],
+        intro: "These project examples show typical work where we support customers in the graphic industry and industrial environments – from technical consulting to on-site implementation.",
+        note: "Note: this page is pre-filled with example project types. Please replace with real, approved customer projects before publishing.",
+        items: [
+          {
+            category: "Graphic industry",
+            title: "Colour management rollout for packaging print",
+            text: "Introducing a consistent colour management workflow for a packaging printer – from colour measurement to print approval.",
+          },
+          {
+            category: "tesa solutions",
+            title: "Adhesive tape solution for a production line",
+            text: "Selecting and introducing a technical tesa adhesive tape solution for an industrial production line, including on-site consulting.",
+          },
+          {
+            category: "Distribution",
+            title: "Germany–South Africa procurement chain",
+            text: "Building a predictable supply chain for technical products from Germany with reliable lead times for customers in Cape Town, Durban and Johannesburg.",
+          },
+          {
+            category: "Industry",
+            title: "Equipping a new production line",
+            text: "Putting together a technical product package for commissioning a new production line.",
+          },
+          {
+            category: "Graphic industry",
+            title: "Switching to more resource-efficient materials",
+            text: "Consulting on more environmentally friendly alternatives in the prepress and production process.",
+          },
+          {
+            category: "Distribution",
+            title: "Sales expansion into Gauteng",
+            text: "Building up sales activities in the Johannesburg region to serve customers there directly.",
+          },
+        ],
       },
       kontakt: {
         label: "Contact",

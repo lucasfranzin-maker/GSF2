@@ -4,6 +4,7 @@
   <url><loc>https://distribution-de.preview.emergentagent.com/standorte</loc><priority>0.8</priority></url>
   <url><loc>https://distribution-de.preview.emergentagent.com/tesa</loc><priority>0.8</priority></url>
   <url><loc>https://distribution-de.preview.emergentagent.com/sortiment</loc><priority>0.8</priority></url>
+  <url><loc>https://distribution-de.preview.emergentagent.com/projekte</loc><priority>0.7</priority></url>
   <url><loc>https://distribution-de.preview.emergentagent.com/ueber-gsf</loc><priority>0.7</priority></url>
   <url><loc>https://distribution-de.preview.emergentagent.com/kontakt</loc><priority>0.7</priority></url>
 </urlset>

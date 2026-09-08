@@ -45,7 +45,10 @@ if RESEND_API_KEY:
 # (503) instead of silently accepting a publicly-known default token.
 ADMIN_TOKEN = os.environ.get('ADMIN_TOKEN', '')
 if not ADMIN_TOKEN:
-    logger.warning('ADMIN_TOKEN is not set - admin endpoints (/api/admin/*, /api/contact GET) are disabled until it is configured.')
+    logger.warning(
+        'ADMIN_TOKEN is not set - admin endpoints (/api/admin/*, /api/contact GET) '
+        'are disabled until it is configured.'
+    )
 
 # Admin sessions: login exchanges ADMIN_TOKEN for a short-lived, HMAC-signed
 # session token, so the actual secret only ever leaves the browser once.
@@ -213,14 +216,17 @@ def _build_email_html(payload: ContactCreate) -> str:
     message_html = _esc(payload.message).replace("\n", "<br>")
     return f"""
     <div style="background:#F6F8FA;padding:28px;font-family:Arial,sans-serif;">
-      <div style="max-width:640px;margin:0 auto;background:#FFFFFF;border:1px solid #CBD3DC;border-radius:12px;overflow:hidden;">
+      <div style="max-width:640px;margin:0 auto;background:#FFFFFF;border:1px solid #CBD3DC;\
+border-radius:12px;overflow:hidden;">
         <div style="padding:22px 26px;border-bottom:1px solid #CBD3DC;">
-          <div style="font-size:12px;letter-spacing:2px;color:#6B7787;text-transform:uppercase;">GSF · Print Engineering Solutions</div>
+          <div style="font-size:12px;letter-spacing:2px;color:#6B7787;text-transform:uppercase;">\
+GSF · Print Engineering Solutions</div>
           <div style="font-size:20px;font-weight:bold;color:#0B1B33;margin-top:6px;">Neue Kontaktanfrage</div>
         </div>
         <table style="width:100%;border-collapse:collapse;">{row_html}</table>
         <div style="padding:18px 26px;">
-          <div style="font-size:13px;color:#6B7787;text-transform:uppercase;letter-spacing:1px;margin-bottom:8px;">Nachricht</div>
+          <div style="font-size:13px;color:#6B7787;text-transform:uppercase;letter-spacing:1px;\
+margin-bottom:8px;">Nachricht</div>
           <div style="font-size:14px;color:#0B1B33;line-height:1.6;">{message_html}</div>
         </div>
         <div style="padding:16px 26px;border-top:1px solid #CBD3DC;font-size:12px;color:#6B7787;">

@@ -1,7 +1,7 @@
 import React from "react";
 import { Link } from "react-router-dom";
 import { MapPin } from "lucide-react";
-import { BrandMark } from "@/components/BrandMark";
+import { BrandLockup } from "@/components/BrandMark";
 import { LanguageToggle } from "@/components/LanguageToggle";
 import { DashedRule } from "@/components/DashedRule";
 import { useLang } from "@/i18n/LanguageContext";
@@ -26,13 +26,7 @@ export const Footer = () => {
         <div className="grid grid-cols-1 md:grid-cols-12 gap-10">
           {/* Brand */}
           <div className="md:col-span-5">
-            <div className="flex items-center gap-3">
-              <BrandMark size={38} />
-              <div className="leading-tight">
-                <div className="font-head font-bold text-lg" style={{ color: "var(--gsf-ink)" }}>GSF – Grafik Service Franzin</div>
-                <div className="font-mono-tech uppercase text-[10px] tracking-[0.2em]" style={{ color: "var(--gsf-muted)" }}>Print Engineering Solutions</div>
-              </div>
-            </div>
+            <BrandLockup />
             <p className="gsf-body mt-5 max-w-sm">
               {t.tesa.badge}.
             </p>

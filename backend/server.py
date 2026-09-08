@@ -1,4 +1,4 @@
-from fastapi import FastAPI, APIRouter, HTTPException, Header
+from fastapi import FastAPI, APIRouter, HTTPException, Header, Request
 from dotenv import load_dotenv
 from starlette.middleware.cors import CORSMiddleware
 from motor.motor_asyncio import AsyncIOMotorClient
@@ -6,6 +6,10 @@ import os
 import asyncio
 import logging
 import secrets
+import hmac
+import hashlib
+import time
+from collections import defaultdict, deque
 from pathlib import Path
 from pydantic import BaseModel, Field, ConfigDict, EmailStr
 from typing import List, Optional
@@ -43,6 +47,16 @@ ADMIN_TOKEN = os.environ.get('ADMIN_TOKEN', '')
 if not ADMIN_TOKEN:
     logger.warning('ADMIN_TOKEN is not set - admin endpoints (/api/admin/*, /api/contact GET) are disabled until it is configured.')
 
+# Admin sessions: login exchanges ADMIN_TOKEN for a short-lived, HMAC-signed
+# session token, so the actual secret only ever leaves the browser once.
+ADMIN_SESSION_TTL_SECONDS = int(os.environ.get('ADMIN_SESSION_TTL_SECONDS', '28800'))  # 8h
+
+# Contact-form spam protection (in-memory, per-process - fine for a single
+# backend instance; would need a shared store e.g. Redis behind a load balancer).
+CONTACT_RATE_LIMIT = int(os.environ.get('CONTACT_RATE_LIMIT', '5'))
+CONTACT_RATE_WINDOW_SECONDS = int(os.environ.get('CONTACT_RATE_WINDOW_SECONDS', '600'))
+_contact_submission_log: dict = defaultdict(deque)
+
 SETTINGS_DOC_ID = 'app_settings'
 
 # Create the main app without a prefix
@@ -76,6 +90,9 @@ class ContactCreate(BaseModel):
     subject: Optional[str] = Field(default="", max_length=200)
     message: str = Field(..., min_length=1, max_length=5000)
     lang: Optional[str] = Field(default="de", max_length=5)
+    # Honeypot: real visitors never see or fill this field (hidden in the UI).
+    # Any non-empty value marks the submission as automated.
+    website: Optional[str] = Field(default="", max_length=200)
 
 
 class ContactResponse(BaseModel):
@@ -92,6 +109,12 @@ class SettingsUpdate(BaseModel):
     contact_recipient: EmailStr
 
 
+class AdminLoginResponse(BaseModel):
+    ok: bool
+    session_token: str
+    expires_at: str
+
+
 # ---------------------------------------------------------------------------
 # Helpers
 # ---------------------------------------------------------------------------
@@ -106,11 +129,59 @@ def _esc(value: Optional[str]) -> str:
     )
 
 
-def _require_admin(x_admin_token: str) -> None:
+def _require_admin_token(x_admin_token: str) -> None:
+    """Checked only at /admin/login, where the real secret is presented."""
     if not ADMIN_TOKEN:
         raise HTTPException(status_code=503, detail="Admin-Zugang ist nicht konfiguriert (ADMIN_TOKEN fehlt).")
     if not secrets.compare_digest(x_admin_token or "", ADMIN_TOKEN):
-        raise HTTPException(status_code=401, detail="Nicht autorisiert")
+        raise HTTPException(status_code=401, detail="Ungültiges Passwort")
+
+
+def _sign(payload: str) -> str:
+    return hmac.new(ADMIN_TOKEN.encode(), payload.encode(), hashlib.sha256).hexdigest()
+
+
+def _issue_session_token() -> AdminLoginResponse:
+    expires_at_ts = int(time.time()) + ADMIN_SESSION_TTL_SECONDS
+    payload = str(expires_at_ts)
+    token = f"{payload}.{_sign(payload)}"
+    expires_at_iso = datetime.fromtimestamp(expires_at_ts, tz=timezone.utc).isoformat()
+    return AdminLoginResponse(ok=True, session_token=token, expires_at=expires_at_iso)
+
+
+def _verify_session_token(token: str) -> bool:
+    if not ADMIN_TOKEN or not token or "." not in token:
+        return False
+    payload, _, sig = token.partition(".")
+    if not secrets.compare_digest(sig, _sign(payload)):
+        return False
+    try:
+        expires_at_ts = int(payload)
+    except ValueError:
+        return False
+    return time.time() < expires_at_ts
+
+
+def _require_admin_session(x_admin_session: str) -> None:
+    if not ADMIN_TOKEN:
+        raise HTTPException(status_code=503, detail="Admin-Zugang ist nicht konfiguriert (ADMIN_TOKEN fehlt).")
+    if not _verify_session_token(x_admin_session or ""):
+        raise HTTPException(status_code=401, detail="Sitzung abgelaufen oder ungültig. Bitte erneut anmelden.")
+
+
+def _client_ip(request: Request) -> str:
+    return request.client.host if request.client else "unknown"
+
+
+def _is_rate_limited(ip: str) -> bool:
+    now = time.time()
+    log = _contact_submission_log[ip]
+    while log and now - log[0] > CONTACT_RATE_WINDOW_SECONDS:
+        log.popleft()
+    if len(log) >= CONTACT_RATE_LIMIT:
+        return True
+    log.append(now)
+    return False
 
 
 async def _get_contact_recipient() -> str:
@@ -211,8 +282,19 @@ async def get_status_checks():
 
 
 @api_router.post("/contact", response_model=ContactResponse)
-async def create_contact(payload: ContactCreate):
+async def create_contact(payload: ContactCreate, request: Request):
     """Store a contact inquiry and send a notification email via Resend."""
+    ip = _client_ip(request)
+
+    if payload.website:
+        # Honeypot triggered - almost certainly a bot. Pretend success
+        # without storing or emailing anything, so it gets no useful signal.
+        logger.info(f"Contact submission from {ip} rejected: honeypot field filled")
+        return ContactResponse(ok=True, id=str(uuid.uuid4()), email_status="skipped")
+
+    if _is_rate_limited(ip):
+        raise HTTPException(status_code=429, detail="Zu viele Anfragen. Bitte versuchen Sie es später erneut.")
+
     contact_id = str(uuid.uuid4())
     email_status = await _send_contact_email(payload)
 
@@ -244,33 +326,33 @@ async def create_contact(payload: ContactCreate):
     return ContactResponse(ok=True, id=contact_id, email_status=email_status)
 
 
-@api_router.post("/admin/login")
+@api_router.post("/admin/login", response_model=AdminLoginResponse)
 async def admin_login(x_admin_token: str = Header(default="")):
-    """Verify an admin token; used to gate the internal inquiries view."""
-    _require_admin(x_admin_token)
-    return {"ok": True}
+    """Verify the admin password and exchange it for a short-lived session token."""
+    _require_admin_token(x_admin_token)
+    return _issue_session_token()
 
 
 @api_router.get("/contact", response_model=List[dict])
-async def list_contacts(x_admin_token: str = Header(default="")):
+async def list_contacts(x_admin_session: str = Header(default="")):
     """Protected admin listing of stored inquiries (most recent first)."""
-    _require_admin(x_admin_token)
+    _require_admin_session(x_admin_session)
     contacts = await db.contacts.find({}, {"_id": 0}).sort("createdAt", -1).to_list(500)
     return contacts
 
 
 @api_router.get("/admin/settings", response_model=SettingsResponse)
-async def get_settings(x_admin_token: str = Header(default="")):
+async def get_settings(x_admin_session: str = Header(default="")):
     """Read the current, DB-stored notification settings (e.g. contact recipient)."""
-    _require_admin(x_admin_token)
+    _require_admin_session(x_admin_session)
     recipient = await _get_contact_recipient()
     return SettingsResponse(contact_recipient=recipient)
 
 
 @api_router.put("/admin/settings", response_model=SettingsResponse)
-async def update_settings(payload: SettingsUpdate, x_admin_token: str = Header(default="")):
+async def update_settings(payload: SettingsUpdate, x_admin_session: str = Header(default="")):
     """Update where contact-form notification emails are sent, without a redeploy."""
-    _require_admin(x_admin_token)
+    _require_admin_session(x_admin_session)
     await db.settings.update_one(
         {"_id": SETTINGS_DOC_ID},
         {"$set": {"contact_recipient": payload.contact_recipient}},

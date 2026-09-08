@@ -1,11 +1,28 @@
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect, useCallback, useRef } from "react";
 import axios from "axios";
 import { Lock, RefreshCw, LogOut, Inbox, ArrowRight, Settings, Save } from "lucide-react";
 import { useLang } from "@/i18n/LanguageContext";
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 const API = `${BACKEND_URL}/api`;
-const TOKEN_KEY = "gsf-admin-token";
+const SESSION_KEY = "gsf-admin-session";
+
+function loadSession() {
+  if (typeof window === "undefined") return null;
+  try {
+    const raw = window.sessionStorage.getItem(SESSION_KEY);
+    if (!raw) return null;
+    const parsed = JSON.parse(raw);
+    if (!parsed?.token || !parsed?.expiresAt) return null;
+    if (new Date(parsed.expiresAt).getTime() <= Date.now()) {
+      window.sessionStorage.removeItem(SESSION_KEY);
+      return null;
+    }
+    return parsed;
+  } catch {
+    return null;
+  }
+}
 
 export default function Admin() {
   const { lang } = useLang();
@@ -16,6 +33,7 @@ export default function Admin() {
     login: de ? "Anmelden" : "Sign in",
     password: de ? "Passwort" : "Password",
     wrong: de ? "Ungültiges Passwort." : "Invalid password.",
+    sessionExpired: de ? "Sitzung abgelaufen. Bitte erneut anmelden." : "Session expired. Please sign in again.",
     empty: de ? "Noch keine Anfragen vorhanden." : "No inquiries yet.",
     refresh: de ? "Aktualisieren" : "Refresh",
     logout: de ? "Abmelden" : "Sign out",
@@ -37,11 +55,12 @@ export default function Admin() {
       : "Could not load settings.",
   };
 
-  const [token, setToken] = useState(() => (typeof window !== "undefined" ? window.sessionStorage.getItem(TOKEN_KEY) || "" : ""));
+  const [session, setSession] = useState(loadSession);
   const [pw, setPw] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const [contacts, setContacts] = useState(null);
+  const logoutTimer = useRef(null);
 
   const [recipient, setRecipient] = useState("");
   const [recipientInput, setRecipientInput] = useState("");
@@ -49,29 +68,40 @@ export default function Admin() {
   const [settingsSaving, setSettingsSaving] = useState(false);
   const [settingsSaved, setSettingsSaved] = useState(false);
 
+  const clearSession = useCallback(() => {
+    window.sessionStorage.removeItem(SESSION_KEY);
+    setSession(null);
+    setContacts(null);
+    setPw("");
+    if (logoutTimer.current) {
+      clearTimeout(logoutTimer.current);
+      logoutTimer.current = null;
+    }
+  }, []);
+
+  const authHeader = (tok) => ({ "X-Admin-Session": tok });
+
   const fetchContacts = useCallback(async (tok) => {
     setLoading(true);
     setError("");
     try {
-      const res = await axios.get(`${API}/contact`, { headers: { "X-Admin-Token": tok } });
+      const res = await axios.get(`${API}/contact`, { headers: authHeader(tok) });
       setContacts(res.data);
     } catch (e) {
       if (e?.response?.status === 401) {
-        setError(T.wrong);
-        setToken("");
-        window.sessionStorage.removeItem(TOKEN_KEY);
-        setContacts(null);
+        setError(T.sessionExpired);
+        clearSession();
       }
     } finally {
       setLoading(false);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [T.wrong]);
+  }, [T.sessionExpired, clearSession]);
 
   const fetchSettings = useCallback(async (tok) => {
     setSettingsError("");
     try {
-      const res = await axios.get(`${API}/admin/settings`, { headers: { "X-Admin-Token": tok } });
+      const res = await axios.get(`${API}/admin/settings`, { headers: authHeader(tok) });
       setRecipient(res.data.contact_recipient || "");
       setRecipientInput(res.data.contact_recipient || "");
     } catch (e) {
@@ -80,11 +110,25 @@ export default function Admin() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [T.settingsUnavailable]);
 
-  useEffect(() => {
-    if (token) {
-      fetchContacts(token);
-      fetchSettings(token);
+  const scheduleAutoLogout = useCallback((expiresAt) => {
+    if (logoutTimer.current) clearTimeout(logoutTimer.current);
+    const ms = new Date(expiresAt).getTime() - Date.now();
+    if (ms <= 0) {
+      clearSession();
+      return;
     }
+    logoutTimer.current = setTimeout(() => clearSession(), ms);
+  }, [clearSession]);
+
+  useEffect(() => {
+    if (session?.token) {
+      fetchContacts(session.token);
+      fetchSettings(session.token);
+      scheduleAutoLogout(session.expiresAt);
+    }
+    return () => {
+      if (logoutTimer.current) clearTimeout(logoutTimer.current);
+    };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -93,11 +137,15 @@ export default function Admin() {
     setError("");
     setLoading(true);
     try {
-      await axios.post(`${API}/admin/login`, {}, { headers: { "X-Admin-Token": pw } });
-      window.sessionStorage.setItem(TOKEN_KEY, pw);
-      setToken(pw);
-      await fetchContacts(pw);
-      await fetchSettings(pw);
+      const res = await axios.post(`${API}/admin/login`, {}, { headers: { "X-Admin-Token": pw } });
+      const { session_token: token, expires_at: expiresAt } = res.data;
+      const next = { token, expiresAt };
+      window.sessionStorage.setItem(SESSION_KEY, JSON.stringify(next));
+      setSession(next);
+      setPw("");
+      scheduleAutoLogout(expiresAt);
+      await fetchContacts(token);
+      await fetchSettings(token);
     } catch (e) {
       setError(T.wrong);
     } finally {
@@ -105,15 +153,11 @@ export default function Admin() {
     }
   };
 
-  const handleLogout = () => {
-    window.sessionStorage.removeItem(TOKEN_KEY);
-    setToken("");
-    setContacts(null);
-    setPw("");
-  };
+  const handleLogout = () => clearSession();
 
   const handleSaveSettings = async (e) => {
     e.preventDefault();
+    if (!session?.token) return;
     setSettingsError("");
     setSettingsSaved(false);
     setSettingsSaving(true);
@@ -121,13 +165,18 @@ export default function Admin() {
       const res = await axios.put(
         `${API}/admin/settings`,
         { contact_recipient: recipientInput },
-        { headers: { "X-Admin-Token": token } }
+        { headers: authHeader(session.token) }
       );
       setRecipient(res.data.contact_recipient || "");
       setRecipientInput(res.data.contact_recipient || "");
       setSettingsSaved(true);
     } catch (e) {
-      setSettingsError(T.saveFailed);
+      if (e?.response?.status === 401) {
+        setSettingsError(T.sessionExpired);
+        clearSession();
+      } else {
+        setSettingsError(T.saveFailed);
+      }
     } finally {
       setSettingsSaving(false);
     }
@@ -142,7 +191,7 @@ export default function Admin() {
   };
 
   // --- Login gate ---
-  if (!token) {
+  if (!session?.token) {
     return (
       <section className="gsf-section">
         <div className="gsf-container max-w-md">
@@ -190,7 +239,7 @@ export default function Admin() {
             {contacts ? <p className="gsf-body mt-2 text-sm">{contacts.length} {T.count}</p> : null}
           </div>
           <div className="flex items-center gap-3">
-            <button type="button" onClick={() => fetchContacts(token)} className="gsf-btn-secondary !py-2.5 !px-4 text-[12px]" data-testid="admin-refresh-button">
+            <button type="button" onClick={() => fetchContacts(session.token)} className="gsf-btn-secondary !py-2.5 !px-4 text-[12px]" data-testid="admin-refresh-button">
               <RefreshCw size={15} strokeWidth={1.8} className={loading ? "animate-spin" : ""} />
               {T.refresh}
             </button>

@@ -40,8 +40,8 @@ Import & Distribution von Produkten für die grafische Industrie sowie tesa Kleb
 - `/tesa` – tesa Partnerschaft & Anwendungen
 - `/sortiment` – Produktbereiche (ohne Preise/Shop)
 - `/ueber-gsf` – Über GSF
-- `/kontakt` – Kontaktformular (Speicherung + E-Mail)
-- `/admin` – Interner Bereich: eingegangene Anfragen + Einstellung des E-Mail-Empfängers (passwortgeschützt via `ADMIN_TOKEN`)
+- `/kontakt` – Kontaktformular (Speicherung + E-Mail, Honeypot- und Rate-Limit-Spamschutz)
+- `/admin` – Interner Bereich: eingegangene Anfragen + Einstellung des E-Mail-Empfängers (passwortgeschützt via `ADMIN_TOKEN`, siehe "Admin-Zugang" unten)
 - `/impressum`, `/datenschutz`
 
 ## Design
@@ -77,6 +77,9 @@ RESEND_API_KEY=re_...                     # Resend API Key
 SENDER_EMAIL=onboarding@resend.dev        # verifizierter Absender (Domain bei Resend verifizieren)
 CONTACT_RECIPIENT=lucas.franzin@googlemail.com  # nur Start-Default, siehe unten
 ADMIN_TOKEN=...                           # Pflicht! Langer, zufälliger String (z. B. `openssl rand -hex 32`)
+ADMIN_SESSION_TTL_SECONDS=28800           # Session-Gültigkeit nach Login, Default 8h
+CONTACT_RATE_LIMIT=5                      # max. Kontaktformular-Anfragen ...
+CONTACT_RATE_WINDOW_SECONDS=600           # ... pro IP innerhalb dieses Zeitfensters (Sek.)
 ```
 
 **frontend/.env** (siehe `frontend/.env.example`)
@@ -84,7 +87,36 @@ ADMIN_TOKEN=...                           # Pflicht! Langer, zufälliger String 
 REACT_APP_BACKEND_URL=http://localhost:8001
 ```
 
-`ADMIN_TOKEN` ist jetzt Pflicht: Ist die Variable nicht gesetzt, antworten alle `/api/admin/*`-Endpunkte sowie `GET /api/contact` mit `503`, statt einen unsicheren Standardwert zu akzeptieren.
+`ADMIN_TOKEN` ist Pflicht: Ist die Variable nicht gesetzt, antworten alle `/api/admin/*`-Endpunkte
+sowie `GET /api/contact` mit `503`, statt einen unsicheren Standardwert zu akzeptieren.
+
+## Admin-Zugang
+
+`POST /api/admin/login` prüft das `ADMIN_TOKEN`-Passwort und tauscht es gegen ein kurzlebiges,
+HMAC-signiertes **Session-Token** (Standard-Gültigkeit 8h, `ADMIN_SESSION_TTL_SECONDS`). Alle
+weiteren Aufrufe (Anfragen-Liste, Einstellungen) verwenden dieses Session-Token im Header
+`X-Admin-Session` – das eigentliche Passwort verlässt den Browser dadurch nur einmal beim
+Login, nicht mehr bei jedem einzelnen Request. Im Frontend liegt nur das Session-Token (inkl.
+Ablaufzeit) in `sessionStorage`; nach Ablauf oder einem `401` vom Server wird automatisch
+ausgeloggt.
+
+Offener Punkt für später: aktuell teilen sich alle Mitarbeiter ein einzelnes Passwort. Echte,
+personalisierte Logins (z. B. E-Mail + Passwort pro Mitarbeiter) wären der nächste Schritt, falls
+Nachvollziehbarkeit ("wer hat wann reingeschaut") relevant wird.
+
+## Spam-Schutz im Kontaktformular
+
+`POST /api/contact` hat zwei einfache Schutzmechanismen gegen automatisierten Spam:
+
+- **Honeypot-Feld** (`website`): im Frontend unsichtbar, wird aber von simplen Formular-Bots
+  häufig automatisch ausgefüllt. Ist das Feld befüllt, wird die Anfrage weder gespeichert noch
+  per Mail verschickt – der Absender bekommt aber weiterhin eine Erfolgsmeldung, damit Bots kein
+  Signal erhalten, dass sie erkannt wurden.
+- **Rate-Limit pro IP**: standardmäßig maximal `CONTACT_RATE_LIMIT` (5) Anfragen pro
+  `CONTACT_RATE_WINDOW_SECONDS` (600s) und IP-Adresse; weitere Anfragen erhalten `429`. Das Limit
+  liegt im Arbeitsspeicher des Backend-Prozesses – für den aktuellen Betrieb mit einer einzelnen
+  Backend-Instanz ausreichend. Bei mehreren Instanzen hinter einem Load Balancer müsste dieses
+  Limit später in einen gemeinsamen Speicher (z. B. Redis) wandern.
 
 ## Kontaktformular / E-Mail (Resend)
 

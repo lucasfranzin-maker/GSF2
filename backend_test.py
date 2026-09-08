@@ -16,6 +16,7 @@ class GSFBackendTester:
     def __init__(self, base_url=None, admin_token=None):
         self.base_url = base_url or os.environ.get("GSF_TEST_BASE_URL", "http://localhost:8001")
         self.admin_token = admin_token if admin_token is not None else os.environ.get("GSF_TEST_ADMIN_TOKEN", "")
+        self.session_token = ""
         self.api_url = f"{self.base_url}/api"
         self.tests_run = 0
         self.tests_passed = 0
@@ -85,6 +86,30 @@ class GSFBackendTester:
         except Exception as e:
             self.log_test("POST /api/contact (valid)", False, f"Exception: {str(e)}")
             return None
+
+    def test_contact_honeypot(self):
+        """Test POST /api/contact with the honeypot field filled is silently dropped"""
+        print("\n🔍 Testing POST /api/contact (honeypot filled → accepted but not delivered)...")
+        timestamp = datetime.now().strftime("%H%M%S")
+        payload = {
+            "name": "Bot",
+            "company": "Bot Inc",
+            "email": f"bot{timestamp}@example.com",
+            "message": "spam",
+            "website": "http://spam.example",
+        }
+        try:
+            response = requests.post(f"{self.api_url}/contact", json=payload, timeout=10)
+            if response.status_code == 200 and response.json().get("email_status") == "skipped":
+                self.log_test("POST /api/contact (honeypot → skipped)", True, f"Response: {response.json()}")
+                return True
+            else:
+                self.log_test("POST /api/contact (honeypot → skipped)", False, 
+                            f"Status {response.status_code}: {response.text}")
+                return False
+        except Exception as e:
+            self.log_test("POST /api/contact (honeypot → skipped)", False, f"Exception: {str(e)}")
+            return False
 
     def test_contact_missing_name(self):
         """Test POST /api/contact with missing name (should return 422)"""
@@ -176,7 +201,7 @@ class GSFBackendTester:
             return False
 
     def test_admin_login_valid(self):
-        """Test POST /api/admin/login with correct token returns {ok:true}"""
+        """Test POST /api/admin/login with correct token returns a session token"""
         print("\n🔍 Testing POST /api/admin/login (valid token)...")
         if not self.admin_token:
             self.log_test("POST /api/admin/login (valid token → 200)", False, "GSF_TEST_ADMIN_TOKEN not set - skipping")
@@ -189,13 +214,14 @@ class GSFBackendTester:
             )
             if response.status_code == 200:
                 data = response.json()
-                if data.get("ok") is True:
+                if data.get("ok") is True and data.get("session_token"):
+                    self.session_token = data["session_token"]
                     self.log_test("POST /api/admin/login (valid token → 200)", True, 
-                                f"Response: {data}")
+                                f"Received session token, expires_at={data.get('expires_at')}")
                     return True
                 else:
                     self.log_test("POST /api/admin/login (valid token → 200)", False, 
-                                f"Expected ok:true, got: {data}")
+                                f"Expected ok:true + session_token, got: {data}")
                     return False
             else:
                 self.log_test("POST /api/admin/login (valid token → 200)", False, 
@@ -243,22 +269,22 @@ class GSFBackendTester:
             self.log_test("POST /api/admin/login (no token → 401)", False, f"Exception: {str(e)}")
             return False
 
-    def test_get_contacts_with_token(self):
-        """Test GET /api/contact with valid token returns list"""
-        print("\n🔍 Testing GET /api/contact (with valid token)...")
-        if not self.admin_token:
-            self.log_test("GET /api/contact (with token → 200)", False, "GSF_TEST_ADMIN_TOKEN not set - skipping")
+    def test_get_contacts_with_session(self):
+        """Test GET /api/contact with a valid session token returns a list"""
+        print("\n🔍 Testing GET /api/contact (with valid session token)...")
+        if not self.session_token:
+            self.log_test("GET /api/contact (with session → 200)", False, "No session token available - skipping")
             return False
         try:
             response = requests.get(
                 f"{self.api_url}/contact",
-                headers={"X-Admin-Token": self.admin_token},
+                headers={"X-Admin-Session": self.session_token},
                 timeout=10
             )
             if response.status_code == 200:
                 data = response.json()
                 if isinstance(data, list):
-                    self.log_test("GET /api/contact (with token → 200)", True, 
+                    self.log_test("GET /api/contact (with session → 200)", True, 
                                 f"Retrieved {len(data)} contact(s)")
                     if len(data) >= 2:
                         first_date = data[0].get("createdAt", "")
@@ -269,53 +295,53 @@ class GSFBackendTester:
                             print(f"   ⚠ Warning: Contacts may not be sorted correctly")
                     return True
                 else:
-                    self.log_test("GET /api/contact (with token → 200)", False, 
+                    self.log_test("GET /api/contact (with session → 200)", False, 
                                 f"Expected list, got: {type(data)}")
                     return False
             else:
-                self.log_test("GET /api/contact (with token → 200)", False, 
+                self.log_test("GET /api/contact (with session → 200)", False, 
                             f"Status {response.status_code}: {response.text}")
                 return False
         except Exception as e:
-            self.log_test("GET /api/contact (with token → 200)", False, f"Exception: {str(e)}")
+            self.log_test("GET /api/contact (with session → 200)", False, f"Exception: {str(e)}")
             return False
 
-    def test_get_contacts_wrong_token(self):
-        """Test GET /api/contact with wrong token returns 401"""
-        print("\n🔍 Testing GET /api/contact (wrong token)...")
+    def test_get_contacts_wrong_session(self):
+        """Test GET /api/contact with an invalid session token returns 401"""
+        print("\n🔍 Testing GET /api/contact (wrong session token)...")
         try:
             response = requests.get(
                 f"{self.api_url}/contact",
-                headers={"X-Admin-Token": "wrong-token"},
+                headers={"X-Admin-Session": "wrong-session-token"},
                 timeout=10
             )
             if response.status_code == 401:
-                self.log_test("GET /api/contact (wrong token → 401)", True, 
+                self.log_test("GET /api/contact (wrong session → 401)", True, 
                             f"Correctly rejected with 401")
                 return True
             else:
-                self.log_test("GET /api/contact (wrong token → 401)", False, 
+                self.log_test("GET /api/contact (wrong session → 401)", False, 
                             f"Expected 401, got {response.status_code}")
                 return False
         except Exception as e:
-            self.log_test("GET /api/contact (wrong token → 401)", False, f"Exception: {str(e)}")
+            self.log_test("GET /api/contact (wrong session → 401)", False, f"Exception: {str(e)}")
             return False
 
-    def test_get_contacts_no_token(self):
-        """Test GET /api/contact without token returns 401"""
-        print("\n🔍 Testing GET /api/contact (no token)...")
+    def test_get_contacts_no_session(self):
+        """Test GET /api/contact without a session token returns 401"""
+        print("\n🔍 Testing GET /api/contact (no session token)...")
         try:
             response = requests.get(f"{self.api_url}/contact", timeout=10)
             if response.status_code == 401:
-                self.log_test("GET /api/contact (no token → 401)", True, 
+                self.log_test("GET /api/contact (no session → 401)", True, 
                             f"Correctly rejected with 401")
                 return True
             else:
-                self.log_test("GET /api/contact (no token → 401)", False, 
+                self.log_test("GET /api/contact (no session → 401)", False, 
                             f"Expected 401, got {response.status_code}")
                 return False
         except Exception as e:
-            self.log_test("GET /api/contact (no token → 401)", False, f"Exception: {str(e)}")
+            self.log_test("GET /api/contact (no session → 401)", False, f"Exception: {str(e)}")
             return False
 
     def run_all_tests(self):
@@ -327,18 +353,19 @@ class GSFBackendTester:
 
         self.test_health_check()
 
-        print("\n--- Admin Login ---")
+        print("\n--- Admin Login (issues a session token) ---")
         self.test_admin_login_valid()
         self.test_admin_login_wrong_token()
         self.test_admin_login_no_token()
 
-        print("\n--- Protected Admin Contact Listing ---")
-        self.test_get_contacts_with_token()
-        self.test_get_contacts_wrong_token()
-        self.test_get_contacts_no_token()
+        print("\n--- Protected Admin Contact Listing (session-token based) ---")
+        self.test_get_contacts_with_session()
+        self.test_get_contacts_wrong_session()
+        self.test_get_contacts_no_session()
 
         print("\n--- Contact Creation ---")
         self.test_contact_valid()
+        self.test_contact_honeypot()
 
         print("\n--- Contact Validation ---")
         self.test_contact_missing_name()

@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from "react";
 import axios from "axios";
-import { Lock, RefreshCw, LogOut, Inbox, ArrowRight } from "lucide-react";
+import { Lock, RefreshCw, LogOut, Inbox, ArrowRight, Settings, Save } from "lucide-react";
 import { useLang } from "@/i18n/LanguageContext";
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
@@ -24,6 +24,17 @@ export default function Admin() {
       ? ["Datum", "Name", "Unternehmen", "E-Mail", "Telefon", "Standort", "Betreff", "Nachricht", "E-Mail"]
       : ["Date", "Name", "Company", "Email", "Phone", "Location", "Subject", "Message", "Email"],
     hint: de ? "Zugang nur für GSF-Mitarbeiter." : "Access for GSF staff only.",
+    settingsTitle: de ? "Benachrichtigungs-Einstellungen" : "Notification settings",
+    recipientLabel: de ? "Empfänger-E-Mail für Kontaktanfragen" : "Recipient email for contact inquiries",
+    recipientHint: de
+      ? "An diese Adresse schickt Resend neue Kontaktanfragen. Im Resend-Testmodus wird nur an die Konto-E-Mail zugestellt."
+      : "New contact inquiries are sent here via Resend. In Resend test mode, delivery only works to the account owner's email.",
+    save: de ? "Speichern" : "Save",
+    saved: de ? "Gespeichert." : "Saved.",
+    saveFailed: de ? "Speichern fehlgeschlagen." : "Failed to save.",
+    settingsUnavailable: de
+      ? "Einstellungen konnten nicht geladen werden."
+      : "Could not load settings.",
   };
 
   const [token, setToken] = useState(() => (typeof window !== "undefined" ? window.sessionStorage.getItem(TOKEN_KEY) || "" : ""));
@@ -31,6 +42,12 @@ export default function Admin() {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const [contacts, setContacts] = useState(null);
+
+  const [recipient, setRecipient] = useState("");
+  const [recipientInput, setRecipientInput] = useState("");
+  const [settingsError, setSettingsError] = useState("");
+  const [settingsSaving, setSettingsSaving] = useState(false);
+  const [settingsSaved, setSettingsSaved] = useState(false);
 
   const fetchContacts = useCallback(async (tok) => {
     setLoading(true);
@@ -51,8 +68,23 @@ export default function Admin() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [T.wrong]);
 
+  const fetchSettings = useCallback(async (tok) => {
+    setSettingsError("");
+    try {
+      const res = await axios.get(`${API}/admin/settings`, { headers: { "X-Admin-Token": tok } });
+      setRecipient(res.data.contact_recipient || "");
+      setRecipientInput(res.data.contact_recipient || "");
+    } catch (e) {
+      setSettingsError(T.settingsUnavailable);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [T.settingsUnavailable]);
+
   useEffect(() => {
-    if (token) fetchContacts(token);
+    if (token) {
+      fetchContacts(token);
+      fetchSettings(token);
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -65,6 +97,7 @@ export default function Admin() {
       window.sessionStorage.setItem(TOKEN_KEY, pw);
       setToken(pw);
       await fetchContacts(pw);
+      await fetchSettings(pw);
     } catch (e) {
       setError(T.wrong);
     } finally {
@@ -77,6 +110,27 @@ export default function Admin() {
     setToken("");
     setContacts(null);
     setPw("");
+  };
+
+  const handleSaveSettings = async (e) => {
+    e.preventDefault();
+    setSettingsError("");
+    setSettingsSaved(false);
+    setSettingsSaving(true);
+    try {
+      const res = await axios.put(
+        `${API}/admin/settings`,
+        { contact_recipient: recipientInput },
+        { headers: { "X-Admin-Token": token } }
+      );
+      setRecipient(res.data.contact_recipient || "");
+      setRecipientInput(res.data.contact_recipient || "");
+      setSettingsSaved(true);
+    } catch (e) {
+      setSettingsError(T.saveFailed);
+    } finally {
+      setSettingsSaving(false);
+    }
   };
 
   const fmtDate = (iso) => {
@@ -145,6 +199,37 @@ export default function Admin() {
               {T.logout}
             </button>
           </div>
+        </div>
+
+        <div className="mt-8 gsf-panel !p-6">
+          <div className="flex items-center gap-3">
+            <Settings size={18} strokeWidth={1.6} style={{ color: "var(--gsf-blue)" }} />
+            <h2 className="gsf-h3 !text-base">{T.settingsTitle}</h2>
+          </div>
+          <form onSubmit={handleSaveSettings} className="mt-4 flex flex-col sm:flex-row sm:items-end gap-3" noValidate>
+            <div className="flex-1">
+              <label htmlFor="admin-recipient" className="block font-mono-tech text-[11px] uppercase tracking-[0.16em] mb-2" style={{ color: "var(--gsf-muted)" }}>
+                {T.recipientLabel}
+              </label>
+              <input
+                id="admin-recipient"
+                type="email"
+                required
+                value={recipientInput}
+                onChange={(e) => { setRecipientInput(e.target.value); setSettingsSaved(false); }}
+                className="w-full rounded-[8px] border bg-white px-4 py-3 text-[15px] outline-none"
+                style={{ borderColor: "var(--gsf-border)", color: "var(--gsf-ink)" }}
+                data-testid="admin-recipient-input"
+              />
+              <p className="gsf-body mt-2 text-xs">{T.recipientHint}</p>
+            </div>
+            <button type="submit" className="gsf-btn-primary !py-3 !px-5" disabled={settingsSaving || recipientInput === recipient} data-testid="admin-settings-save-button">
+              <Save size={15} strokeWidth={1.8} />
+              {settingsSaving ? "…" : T.save}
+            </button>
+          </form>
+          {settingsSaved ? <p className="mt-2 text-xs" style={{ color: "var(--gsf-success)" }} data-testid="admin-settings-saved">{T.saved}</p> : null}
+          {settingsError ? <p className="mt-2 text-xs" style={{ color: "var(--gsf-danger)" }} data-testid="admin-settings-error">{settingsError}</p> : null}
         </div>
 
         <div className="mt-8 gsf-panel !p-0 overflow-hidden">

@@ -13,12 +13,14 @@ const API = `${BACKEND_URL}/api`;
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
+const EMPTY_FORM = { name: "", company: "", email: "", phone: "", location: "", subject: "", message: "", website: "" };
+
 export default function Kontakt() {
   const { t, lang } = useLang();
   const p = t.pages.kontakt;
   const f = p.form;
 
-  const [form, setForm] = useState({ name: "", company: "", email: "", phone: "", location: "", subject: "", message: "" });
+  const [form, setForm] = useState({ ...EMPTY_FORM });
   const [errors, setErrors] = useState({});
   const [submitting, setSubmitting] = useState(false);
   const [success, setSuccess] = useState(false);
@@ -49,7 +51,7 @@ export default function Kontakt() {
       await axios.post(`${API}/contact`, { ...form, lang });
       setSuccess(true);
       toast.success(f.successTitle);
-      setForm({ name: "", company: "", email: "", phone: "", location: "", subject: "", message: "" });
+      setForm({ ...EMPTY_FORM });
     } catch (err) {
       console.error("contact submit failed", err);
       toast.error(f.errorSend);
@@ -104,6 +106,20 @@ export default function Kontakt() {
               </Reveal>
             ) : (
               <form onSubmit={handleSubmit} noValidate className="gsf-panel !p-6 sm:!p-8" data-testid="contact-form">
+                {/* Honeypot: hidden from real visitors, often auto-filled by simple bots. */}
+                <div style={{ position: "absolute", left: "-9999px", top: "-9999px", width: 0, height: 0, overflow: "hidden" }} aria-hidden="true">
+                  <label htmlFor="cf-website">Website</label>
+                  <input
+                    id="cf-website"
+                    name="website"
+                    type="text"
+                    tabIndex={-1}
+                    autoComplete="off"
+                    value={form.website}
+                    onChange={setField("website")}
+                  />
+                </div>
+
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
                   <Field id="cf-name" k="name" required half />
                   <Field id="cf-company" k="company" required half />

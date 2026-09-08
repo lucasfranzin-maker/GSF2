@@ -18,8 +18,11 @@ Import & Distribution von Produkten für die grafische Industrie sowie tesa Kleb
 /app
 ├── backend/
 │   ├── server.py              # FastAPI App + /api/contact (Speicherung + Resend-Mail)
-│   ├── requirements.txt
-│   └── .env                   # NICHT committen (siehe .env.example)
+│   ├── requirements.txt       # Laufzeit-Abhängigkeiten
+│   ├── requirements-dev.txt   # zusätzlich: Tests/Lint (pytest, flake8, ...)
+│   ├── .env.example           # Vorlage für backend/.env (NICHT committen)
+│   └── .env                   # NICHT committen
+├── .github/workflows/ci.yml   # Lint/Build-Check für Backend & Frontend
 └── frontend/
     ├── public/                # index.html (SEO/OG), robots.txt, sitemap.xml
     └── src/
@@ -27,7 +30,7 @@ Import & Distribution von Produkten für die grafische Industrie sowie tesa Kleb
         ├── index.css          # GSF Design-Tokens (Farben, Typo, Regeln)
         ├── i18n/              # LanguageContext + Übersetzungen (DE/EN)
         ├── components/        # Header, Footer, RouteMap, BrandMark, PartnerLogos, ...
-        └── pages/             # Home, UeberGsf, Standorte, Tesa, Sortiment, Kontakt, Impressum, Datenschutz
+        └── pages/             # Home, UeberGsf, Standorte, Tesa, Sortiment, Kontakt, Admin, Impressum, Datenschutz
 ```
 
 ## Seiten / Routen
@@ -38,6 +41,7 @@ Import & Distribution von Produkten für die grafische Industrie sowie tesa Kleb
 - `/sortiment` – Produktbereiche (ohne Preise/Shop)
 - `/ueber-gsf` – Über GSF
 - `/kontakt` – Kontaktformular (Speicherung + E-Mail)
+- `/admin` – Interner Bereich: eingegangene Anfragen + Einstellung des E-Mail-Empfängers (passwortgeschützt via `ADMIN_TOKEN`)
 - `/impressum`, `/datenschutz`
 
 ## Design
@@ -49,8 +53,8 @@ Technisch-industrielle Editorial-Ästhetik: viel Weißraum, dünne/gestrichelte 
 ### Backend
 ```bash
 cd backend
-pip install -r requirements.txt
-# .env anlegen (siehe .env.example)
+pip install -r requirements-dev.txt   # oder requirements.txt ohne Test-/Lint-Tools
+cp .env.example .env                  # Werte anpassen, siehe unten
 uvicorn server:app --host 0.0.0.0 --port 8001 --reload
 ```
 
@@ -58,38 +62,55 @@ uvicorn server:app --host 0.0.0.0 --port 8001 --reload
 ```bash
 cd frontend
 yarn install
-# .env anlegen (siehe .env.example)
+cp .env.example .env                  # Werte anpassen, siehe unten
 yarn start
 ```
 
 ## Environment-Variablen
 
-**backend/.env**
+**backend/.env** (siehe `backend/.env.example`)
 ```
 MONGO_URL=mongodb://localhost:27017
-DB_NAME=test_database
-CORS_ORIGINS=*
-RESEND_API_KEY=re_...              # Resend API Key
-SENDER_EMAIL=onboarding@resend.dev # verifizierter Absender (Domain bei Resend verifizieren)
-CONTACT_RECIPIENT=info@franzin.de  # Empfänger der Kontaktanfragen
+DB_NAME=gsf_database
+CORS_ORIGINS=http://localhost:3000        # kommagetrennte Liste, kein "*" in Produktion
+RESEND_API_KEY=re_...                     # Resend API Key
+SENDER_EMAIL=onboarding@resend.dev        # verifizierter Absender (Domain bei Resend verifizieren)
+CONTACT_RECIPIENT=lucas.franzin@googlemail.com  # nur Start-Default, siehe unten
+ADMIN_TOKEN=...                           # Pflicht! Langer, zufälliger String (z. B. `openssl rand -hex 32`)
 ```
 
-**frontend/.env**
+**frontend/.env** (siehe `frontend/.env.example`)
 ```
-REACT_APP_BACKEND_URL=https://<deine-backend-url>
+REACT_APP_BACKEND_URL=http://localhost:8001
 ```
+
+`ADMIN_TOKEN` ist jetzt Pflicht: Ist die Variable nicht gesetzt, antworten alle `/api/admin/*`-Endpunkte sowie `GET /api/contact` mit `503`, statt einen unsicheren Standardwert zu akzeptieren.
 
 ## Kontaktformular / E-Mail (Resend)
 
 `POST /api/contact` speichert jede Anfrage in MongoDB (`contacts`) und versendet eine
-Benachrichtigung per Resend an `CONTACT_RECIPIENT`. **Hinweis:** Im Resend-Testmodus
-(ohne verifizierte Domain) können E-Mails nur an die E-Mail des Kontoinhabers zugestellt
-werden. Für den Live-Betrieb eine eigene Domain unter resend.com/domains verifizieren und
-`SENDER_EMAIL` auf eine Adresse dieser Domain setzen sowie `CONTACT_RECIPIENT` auf
-`sales-sa@franzin.de` / `info@franzin.de` umstellen.
+Benachrichtigung per Resend an den aktuell hinterlegten Empfänger. Dieser Empfänger ist
+**keine feste Umgebungsvariable mehr**, sondern eine in MongoDB gespeicherte Einstellung:
+
+- `CONTACT_RECIPIENT` in `backend/.env` dient nur als **Start-Default**, der beim allerersten
+  Start in die Datenbank übernommen wird.
+- Danach kann der Empfänger jederzeit direkt im **Admin-Bereich (`/admin`)** geändert werden
+  (Feld "Empfänger-E-Mail" bzw. "Recipient email"), ohne Code-Änderung oder Redeploy.
+- Aktuell ist der Empfänger auf `lucas.franzin@googlemail.com` gesetzt (Resend-Testmodus).
+
+**Hinweis:** Im Resend-Testmodus (ohne verifizierte Domain) können E-Mails nur an die E-Mail
+des Kontoinhabers zugestellt werden. Für den Live-Betrieb eine eigene Domain unter
+resend.com/domains verifizieren, `SENDER_EMAIL` auf eine Adresse dieser Domain setzen und
+den Empfänger im Admin-Bereich auf `sales-sa@franzin.de` / `info@franzin.de` umstellen.
 
 ## SEO & Accessibility
 
 - Title, Meta-Description, Open Graph in `frontend/public/index.html`
 - `robots.txt` + `sitemap.xml`
 - Semantische HTML-Struktur, sichtbare Focus-States, ARIA-Labels, beschriftete Formularfelder
+
+## CI
+
+`.github/workflows/ci.yml` prüft bei jedem Push/PR: Backend-Lint (`flake8`) + Compile-Check,
+sowie den Frontend-Build (`yarn build`). Das ersetzt keine vollständige Testsuite, gibt aber
+eine automatische Rückmeldung, bevor kaputter Code auf `main` landet.

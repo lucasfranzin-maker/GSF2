@@ -5,6 +5,7 @@ from motor.motor_asyncio import AsyncIOMotorClient
 import os
 import asyncio
 import logging
+import secrets
 from pathlib import Path
 from pydantic import BaseModel, Field, ConfigDict, EmailStr
 from typing import List, Optional
@@ -16,6 +17,12 @@ import resend
 ROOT_DIR = Path(__file__).parent
 load_dotenv(ROOT_DIR / '.env')
 
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+)
+logger = logging.getLogger(__name__)
+
 # MongoDB connection
 mongo_url = os.environ['MONGO_URL']
 client = AsyncIOMotorClient(mongo_url)
@@ -24,10 +31,19 @@ db = client[os.environ['DB_NAME']]
 # Email (Resend)
 RESEND_API_KEY = os.environ.get('RESEND_API_KEY')
 SENDER_EMAIL = os.environ.get('SENDER_EMAIL', 'onboarding@resend.dev')
-CONTACT_RECIPIENT = os.environ.get('CONTACT_RECIPIENT', '')
-ADMIN_TOKEN = os.environ.get('ADMIN_TOKEN', 'gsf-admin-2026')
+# Initial/fallback recipient, seeded into the DB-backed setting below on first
+# startup. After that, the value stored in MongoDB (editable from /admin) wins.
+DEFAULT_CONTACT_RECIPIENT = os.environ.get('CONTACT_RECIPIENT', 'lucas.franzin@googlemail.com')
 if RESEND_API_KEY:
     resend.api_key = RESEND_API_KEY
+
+# Admin auth. No hardcoded fallback: if unset, admin endpoints are disabled
+# (503) instead of silently accepting a publicly-known default token.
+ADMIN_TOKEN = os.environ.get('ADMIN_TOKEN', '')
+if not ADMIN_TOKEN:
+    logger.warning('ADMIN_TOKEN is not set - admin endpoints (/api/admin/*, /api/contact GET) are disabled until it is configured.')
+
+SETTINGS_DOC_ID = 'app_settings'
 
 # Create the main app without a prefix
 app = FastAPI(title="GSF – Grafik Service Franzin API")
@@ -68,6 +84,14 @@ class ContactResponse(BaseModel):
     email_status: str
 
 
+class SettingsResponse(BaseModel):
+    contact_recipient: str
+
+
+class SettingsUpdate(BaseModel):
+    contact_recipient: EmailStr
+
+
 # ---------------------------------------------------------------------------
 # Helpers
 # ---------------------------------------------------------------------------
@@ -80,6 +104,20 @@ def _esc(value: Optional[str]) -> str:
         .replace("<", "&lt;")
         .replace(">", "&gt;")
     )
+
+
+def _require_admin(x_admin_token: str) -> None:
+    if not ADMIN_TOKEN:
+        raise HTTPException(status_code=503, detail="Admin-Zugang ist nicht konfiguriert (ADMIN_TOKEN fehlt).")
+    if not secrets.compare_digest(x_admin_token or "", ADMIN_TOKEN):
+        raise HTTPException(status_code=401, detail="Nicht autorisiert")
+
+
+async def _get_contact_recipient() -> str:
+    doc = await db.settings.find_one({"_id": SETTINGS_DOC_ID})
+    if doc and doc.get("contact_recipient"):
+        return doc["contact_recipient"]
+    return DEFAULT_CONTACT_RECIPIENT
 
 
 def _build_email_html(payload: ContactCreate) -> str:
@@ -123,15 +161,16 @@ def _build_email_html(payload: ContactCreate) -> str:
 
 
 async def _send_contact_email(payload: ContactCreate) -> str:
-    """Returns 'sent', 'skipped' (no key) or 'failed:<reason>'."""
-    if not RESEND_API_KEY or not CONTACT_RECIPIENT:
-        logger.warning("Email skipped: RESEND_API_KEY or CONTACT_RECIPIENT not configured")
+    """Returns 'sent', 'skipped' (no key/recipient) or 'failed:<reason>'."""
+    recipient = await _get_contact_recipient()
+    if not RESEND_API_KEY or not recipient:
+        logger.warning("Email skipped: RESEND_API_KEY or contact recipient not configured")
         return "skipped"
 
     subject = payload.subject or "Kontaktanfrage"
     params = {
         "from": f"GSF Kontakt <{SENDER_EMAIL}>",
-        "to": [CONTACT_RECIPIENT],
+        "to": [recipient],
         "reply_to": payload.email,
         "subject": f"[GSF Website] {subject} – {payload.name}",
         "html": _build_email_html(payload),
@@ -208,18 +247,36 @@ async def create_contact(payload: ContactCreate):
 @api_router.post("/admin/login")
 async def admin_login(x_admin_token: str = Header(default="")):
     """Verify an admin token; used to gate the internal inquiries view."""
-    if x_admin_token != ADMIN_TOKEN:
-        raise HTTPException(status_code=401, detail="Ungültiges Passwort")
+    _require_admin(x_admin_token)
     return {"ok": True}
 
 
 @api_router.get("/contact", response_model=List[dict])
 async def list_contacts(x_admin_token: str = Header(default="")):
     """Protected admin listing of stored inquiries (most recent first)."""
-    if x_admin_token != ADMIN_TOKEN:
-        raise HTTPException(status_code=401, detail="Nicht autorisiert")
+    _require_admin(x_admin_token)
     contacts = await db.contacts.find({}, {"_id": 0}).sort("createdAt", -1).to_list(500)
     return contacts
+
+
+@api_router.get("/admin/settings", response_model=SettingsResponse)
+async def get_settings(x_admin_token: str = Header(default="")):
+    """Read the current, DB-stored notification settings (e.g. contact recipient)."""
+    _require_admin(x_admin_token)
+    recipient = await _get_contact_recipient()
+    return SettingsResponse(contact_recipient=recipient)
+
+
+@api_router.put("/admin/settings", response_model=SettingsResponse)
+async def update_settings(payload: SettingsUpdate, x_admin_token: str = Header(default="")):
+    """Update where contact-form notification emails are sent, without a redeploy."""
+    _require_admin(x_admin_token)
+    await db.settings.update_one(
+        {"_id": SETTINGS_DOC_ID},
+        {"$set": {"contact_recipient": payload.contact_recipient}},
+        upsert=True,
+    )
+    return SettingsResponse(contact_recipient=payload.contact_recipient)
 
 
 # Include the router in the main app
@@ -227,17 +284,25 @@ app.include_router(api_router)
 
 app.add_middleware(
     CORSMiddleware,
-    allow_credentials=True,
+    # No cookies/sessions are used (admin auth is a bearer token in a custom
+    # header), so credentials are not needed here. Keeping this False avoids
+    # the unsafe combination of a wildcard origin with allow_credentials=True.
+    allow_credentials=False,
     allow_origins=os.environ.get('CORS_ORIGINS', '*').split(','),
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
-logging.basicConfig(
-    level=logging.INFO,
-    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
-)
-logger = logging.getLogger(__name__)
+
+@app.on_event("startup")
+async def seed_settings():
+    """Seed the DB-stored contact recipient once, from CONTACT_RECIPIENT/default."""
+    existing = await db.settings.find_one({"_id": SETTINGS_DOC_ID})
+    if not existing:
+        await db.settings.insert_one({
+            "_id": SETTINGS_DOC_ID,
+            "contact_recipient": DEFAULT_CONTACT_RECIPIENT,
+        })
 
 
 @app.on_event("shutdown")

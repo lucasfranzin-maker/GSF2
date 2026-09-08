@@ -1,16 +1,22 @@
 #!/usr/bin/env python3
 """
 Backend API tests for GSF – Grafik Service Franzin
-Tests all /api endpoints using the public preview URL
+Tests all /api endpoints against a configurable base URL.
+
+Configuration (environment variables):
+  GSF_TEST_BASE_URL     Base URL of the backend, default http://localhost:8001
+  GSF_TEST_ADMIN_TOKEN  Admin token matching the backend's ADMIN_TOKEN env var
 """
+import os
 import requests
 import sys
 from datetime import datetime
 
 class GSFBackendTester:
-    def __init__(self, base_url="https://distribution-de.preview.emergentagent.com"):
-        self.base_url = base_url
-        self.api_url = f"{base_url}/api"
+    def __init__(self, base_url=None, admin_token=None):
+        self.base_url = base_url or os.environ.get("GSF_TEST_BASE_URL", "http://localhost:8001")
+        self.admin_token = admin_token if admin_token is not None else os.environ.get("GSF_TEST_ADMIN_TOKEN", "")
+        self.api_url = f"{self.base_url}/api"
         self.tests_run = 0
         self.tests_passed = 0
         self.test_results = []
@@ -172,10 +178,13 @@ class GSFBackendTester:
     def test_admin_login_valid(self):
         """Test POST /api/admin/login with correct token returns {ok:true}"""
         print("\n🔍 Testing POST /api/admin/login (valid token)...")
+        if not self.admin_token:
+            self.log_test("POST /api/admin/login (valid token → 200)", False, "GSF_TEST_ADMIN_TOKEN not set - skipping")
+            return False
         try:
             response = requests.post(
                 f"{self.api_url}/admin/login",
-                headers={"X-Admin-Token": "gsf-admin-2026"},
+                headers={"X-Admin-Token": self.admin_token},
                 timeout=10
             )
             if response.status_code == 200:
@@ -237,10 +246,13 @@ class GSFBackendTester:
     def test_get_contacts_with_token(self):
         """Test GET /api/contact with valid token returns list"""
         print("\n🔍 Testing GET /api/contact (with valid token)...")
+        if not self.admin_token:
+            self.log_test("GET /api/contact (with token → 200)", False, "GSF_TEST_ADMIN_TOKEN not set - skipping")
+            return False
         try:
             response = requests.get(
                 f"{self.api_url}/contact",
-                headers={"X-Admin-Token": "gsf-admin-2026"},
+                headers={"X-Admin-Token": self.admin_token},
                 timeout=10
             )
             if response.status_code == 200:
@@ -248,7 +260,6 @@ class GSFBackendTester:
                 if isinstance(data, list):
                     self.log_test("GET /api/contact (with token → 200)", True, 
                                 f"Retrieved {len(data)} contact(s)")
-                    # Check if most recent first (if we have multiple)
                     if len(data) >= 2:
                         first_date = data[0].get("createdAt", "")
                         second_date = data[1].get("createdAt", "")
@@ -310,37 +321,31 @@ class GSFBackendTester:
     def run_all_tests(self):
         """Run all backend tests"""
         print("=" * 70)
-        print("GSF BACKEND API TESTS (Iteration 2 - New Admin Features)")
+        print("GSF BACKEND API TESTS")
         print(f"Testing: {self.base_url}")
         print("=" * 70)
 
-        # Test health check
         self.test_health_check()
 
-        # NEW: Test admin login endpoint
-        print("\n--- NEW FEATURE: Admin Login ---")
+        print("\n--- Admin Login ---")
         self.test_admin_login_valid()
         self.test_admin_login_wrong_token()
         self.test_admin_login_no_token()
 
-        # NEW: Test protected admin contact listing
-        print("\n--- NEW FEATURE: Protected Admin Contact Listing ---")
+        print("\n--- Protected Admin Contact Listing ---")
         self.test_get_contacts_with_token()
         self.test_get_contacts_wrong_token()
         self.test_get_contacts_no_token()
 
-        # REGRESSION: Test contact creation
-        print("\n--- REGRESSION: Contact Creation ---")
-        contact_id = self.test_contact_valid()
+        print("\n--- Contact Creation ---")
+        self.test_contact_valid()
 
-        # REGRESSION: Test validation errors (422)
-        print("\n--- REGRESSION: Contact Validation ---")
+        print("\n--- Contact Validation ---")
         self.test_contact_missing_name()
         self.test_contact_missing_company()
         self.test_contact_missing_message()
         self.test_contact_invalid_email()
 
-        # Summary
         print("\n" + "=" * 70)
         print(f"📊 TEST SUMMARY: {self.tests_passed}/{self.tests_run} tests passed")
         print("=" * 70)

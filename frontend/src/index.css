@@ -33,10 +33,11 @@
     --gsf-radius-lg: 18px;
     --gsf-transition: 180ms cubic-bezier(0.2, 0.8, 0.2, 1);
 
-    /* Typography follows the broad, geometric GSF wordmark. */
-    --gsf-font-display: "Archivo", "Arial", system-ui, sans-serif;
-    --gsf-font-body: "Inter", system-ui, -apple-system, "Segoe UI", sans-serif;
-    --gsf-font-tech: "IBM Plex Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+    /* One unified family across the complete GSF interface and logo descriptor. */
+    --gsf-font-brand: "Archivo", "Arial", system-ui, sans-serif;
+    --gsf-font-display: var(--gsf-font-brand);
+    --gsf-font-body: var(--gsf-font-brand);
+    --gsf-font-tech: var(--gsf-font-brand);
 
     /* shadcn token mapping -> GSF palette */
     --background: 210 33% 98%;

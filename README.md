@@ -165,9 +165,9 @@ Interaktionsfeedback und der Nutzerführung zwischen den zentralen Einstiegsseit
 
 - Designsystem erweitert: flüssige Typografie, präzisere Abstände, Touch-Zielgrößen,
   vereinheitlichte Transitionen sowie bessere Hover-, Active-, Disabled- und Focus-Zustände.
-- Typografie an der breiten, geometrischen GSF-Wortmarke ausgerichtet: `Archivo` für
-  Headlines, Navigation und Buttons; `Inter` bleibt für Fließtext und `IBM Plex Mono`
-  für technische Mikrotexte erhalten.
+- Typografie konsequent an der breiten, geometrischen GSF-Wortmarke ausgerichtet:
+  `Archivo` wird einheitlich für Headlines, Navigation, Buttons, Fließtext, technische
+  Mikrotexte und die Logo-Unterzeilen verwendet.
 - Offizielle Partnerlogos als optimierte PNG-Assets eingebunden. tesa erhält als Alliance
   Partner eine vollbreite Featured-Fläche; ECOGRAPH, ISRA VISION und JUST NORMLICHT folgen
   als drei gleichwertig sichtbare Partnerkarten.
@@ -215,5 +215,9 @@ Footer auf Vercel dieselbe deployte Datei; die zuvor beschädigte Base64-Einbett
 mehr zur Laufzeit geladen.
 
 Die Bildmarke wurde ausschließlich aus den noch intakten Originalpixeln der im Repository
-vorhandenen GSF-Datei wiederhergestellt. Es wurde kein Logo aus dem Web und keine fremde
-Ersatzgrafik verwendet.
+vorhandenen GSF-Datei wiederhergestellt. Die Legacy-Unterzeilen **„Grafik Service Franzin“**
+und **„Print Engineering Solutions“** werden in `BrandMark.jsx` direkt unter der Bildmarke
+gesetzt. Dadurch bleiben sie in jeder Größe scharf und verwenden mit **Archivo** exakt dieselbe
+Schriftfamilie wie Navigation, Headlines, Fließtext, Buttons und technische Labels. Nur
+eigenständige Partnerlogos behalten ihre jeweilige Originaltypografie. Es wurde kein Logo aus
+dem Web und keine fremde Ersatzgrafik verwendet.

@@ -2,24 +2,49 @@ import React from "react";
 
 const GSF_LOGO_PATH = "/gsf-logo.png";
 
-// Official GSF mosaic mark + wordmark, served as a static asset so production
-// builds and Vercel can load the same file in header and footer.
+const BrandSignature = ({ compact = false, width, className = "", testId }) => {
+  const logoWidth = width ?? (compact ? 96 : 132);
+  const primarySize = compact ? 5.5 : 7.5;
+  const secondarySize = compact ? 5 : 6.5;
+
+  return (
+    <span
+      role="img"
+      aria-label="GSF – Grafik Service Franzin – Print Engineering Solutions"
+      className={`inline-flex shrink-0 flex-col ${className}`}
+      style={{ width: logoWidth }}
+      data-testid={testId}
+    >
+      <img
+        src={GSF_LOGO_PATH}
+        alt=""
+        aria-hidden="true"
+        className="block h-auto w-full"
+      />
+      <span
+        aria-hidden="true"
+        className="mt-[3px] whitespace-nowrap text-center font-head font-bold uppercase leading-none"
+        style={{ fontSize: primarySize, letterSpacing: "0.075em" }}
+      >
+        Grafik Service Franzin
+      </span>
+      <span
+        aria-hidden="true"
+        className="mt-[3px] whitespace-nowrap text-center font-head font-medium leading-none"
+        style={{ fontSize: secondarySize, letterSpacing: "0.07em" }}
+      >
+        Print Engineering Solutions
+      </span>
+    </span>
+  );
+};
+
+// Complete responsive lockup for the desktop header and compact mobile navigation.
 export const BrandLockup = ({ compact = false }) => (
-  <img
-    src={GSF_LOGO_PATH}
-    alt="GSF – Grafik Service Franzin – Print Engineering Solutions"
-    className="w-auto"
-    style={{ height: compact ? 30 : 38 }}
-    data-testid="brand-lockup"
-  />
+  <BrandSignature compact={compact} testId="brand-lockup" />
 );
 
-// Same official mark at a smaller height, for tight spots like the footer brand block.
-export const BrandMark = ({ size = 40, className = "" }) => (
-  <img
-    src={GSF_LOGO_PATH}
-    alt="GSF – Grafik Service Franzin"
-    className={`w-auto ${className}`}
-    style={{ height: size }}
-  />
+// Same complete lockup for reusable brand placements such as the footer.
+export const BrandMark = ({ size = 132, className = "" }) => (
+  <BrandSignature width={size} className={className} />
 );

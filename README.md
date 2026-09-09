@@ -205,3 +205,15 @@ sind auf `18.3.1` und `date-fns` auf `3.6.0` festgelegt, da
 `react-day-picker@8.10.1` React bis Version 18 und `date-fns` bis Version 3 unterstützt.
 Damit werden Peer-Dependency-Konflikte korrekt gelöst, ohne `--force` oder
 `--legacy-peer-deps`.
+
+
+## GSF-Logo im Deployment
+
+Das Hauptlogo liegt als statisches Asset unter `frontend/public/gsf-logo.png` und wird von
+`BrandMark.jsx` über den Root-Pfad `/gsf-logo.png` eingebunden. Damit verwenden Header und
+Footer auf Vercel dieselbe deployte Datei; die zuvor beschädigte Base64-Einbettung wird nicht
+mehr zur Laufzeit geladen.
+
+Die Bildmarke wurde ausschließlich aus den noch intakten Originalpixeln der im Repository
+vorhandenen GSF-Datei wiederhergestellt. Es wurde kein Logo aus dem Web und keine fremde
+Ersatzgrafik verwendet.

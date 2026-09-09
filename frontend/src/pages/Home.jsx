@@ -234,18 +234,16 @@ export default function Home() {
       <section className="gsf-section" data-testid="home-partners">
         <div className="gsf-container">
           <SectionLabel icon={Handshake} label={t.partners.label} />
-          <div className="mt-10 grid grid-cols-1 lg:grid-cols-12 gap-10 items-start">
-            <Reveal className="lg:col-span-5">
-              <h2 className="gsf-h2">
-                {t.partners.headline.map((l, i) => <span key={i} className="block">{l}</span>)}
-              </h2>
-              <p className="gsf-body mt-5 max-w-md">{t.partners.text}</p>
-            </Reveal>
-            <div className="lg:col-span-7">
-              <div className="gsf-kicker mb-4">{t.partners.barLabel}</div>
-              <PartnerLogoGrid note={lang === "de" ? "in Südafrika – exklusiv bei GSF" : "in South Africa – exclusive at GSF"} />
-            </div>
-          </div>
+          <Reveal className="mt-10">
+            <h2 className="gsf-h2 max-w-3xl">
+              {t.partners.headline.map((l, i) => <span key={i} className="block">{l}</span>)}
+            </h2>
+            <p className="gsf-body mt-5 max-w-2xl">{t.partners.text}</p>
+          </Reveal>
+          <div className="gsf-kicker mt-10 mb-4">{t.partners.barLabel}</div>
+          <Reveal delay={0.08}>
+            <PartnerLogoGrid note={lang === "de" ? "in Südafrika – exklusiv bei GSF" : "in South Africa – exclusive at GSF"} />
+          </Reveal>
         </div>
       </section>
 

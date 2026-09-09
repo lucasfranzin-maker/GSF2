@@ -16,7 +16,9 @@ function setCanonical(path) {
     link.setAttribute("rel", "canonical");
     document.head.appendChild(link);
   }
-  link.setAttribute("href", `${SITE_URL}${path === "/" ? "" : path}/`.replace(/\/+$/, path === "/" ? "/" : "/"));
+  // No trailing slash on sub-paths, to match the URLs listed in sitemap.xml.
+  const cleanPath = path === "/" ? "/" : path.replace(/\/+$/, "");
+  link.setAttribute("href", `${SITE_URL}${cleanPath}`);
 }
 
 // Updates document.title, the meta description, Open Graph title/description

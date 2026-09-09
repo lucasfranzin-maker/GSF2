@@ -188,3 +188,20 @@ Codex arbeitet ausschließlich auf dem oben genannten Branch. Content-, SEO- und
 auf `claude/*`-Branches werden nicht verändert. Vor einem Merge sollte `main` in diesen Branch
 aktualisiert, die CI erneut ausgeführt und anschließend gezielt nur der geprüfte PR gemergt werden.
 So bleiben Verantwortungsbereiche, Review und eventuelle Konflikte transparent.
+
+
+## Vercel-Deployment
+
+Das Frontend wird aus dem Unterverzeichnis `frontend` gebaut. Empfohlene Vercel-Einstellungen:
+
+- Root Directory: `frontend`
+- Install Command: `npm install`
+- Build Command: `npm run build`
+- Output Directory: `build`
+- Environment Variable: `REACT_APP_BACKEND_URL` mit der öffentlich erreichbaren Backend-URL
+
+Die Frontend-CI verwendet bewusst denselben npm-Installationsweg wie Vercel. React/ReactDOM
+sind auf `18.3.1` und `date-fns` auf `3.6.0` festgelegt, da
+`react-day-picker@8.10.1` React bis Version 18 und `date-fns` bis Version 3 unterstützt.
+Damit werden Peer-Dependency-Konflikte korrekt gelöst, ohne `--force` oder
+`--legacy-peer-deps`.

@@ -45,7 +45,7 @@ export const Header = () => {
   ];
 
   const navClass = ({ isActive }) =>
-    `relative font-head uppercase text-[13px] tracking-[0.08em] font-medium transition-colors duration-150 py-1 ${isActive ? "gsf-nav-active" : ""}`;
+    `relative font-head uppercase text-[12px] xl:text-[13px] tracking-[0.04em] font-semibold transition-colors duration-150 py-1 ${isActive ? "gsf-nav-active" : ""}`;
 
   return (
     <header
@@ -110,7 +110,7 @@ export const Header = () => {
                     key={l.to}
                     to={l.to}
                     onClick={() => setOpen(false)}
-                    className="group flex items-center justify-between font-head uppercase text-base tracking-[0.06em] py-4"
+                    className="group flex items-center justify-between font-head uppercase text-base tracking-[0.035em] font-semibold py-4"
                     style={({ isActive }) => ({
                       color: isActive ? "var(--gsf-blue)" : "var(--gsf-ink)",
                       borderBottom: "1px solid var(--gsf-border)",

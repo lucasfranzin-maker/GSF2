@@ -146,3 +146,45 @@ den Empfänger im Admin-Bereich auf `sales-sa@franzin.de` / `info@franzin.de` um
 `.github/workflows/ci.yml` prüft bei jedem Push/PR: Backend-Lint (`flake8`) + Compile-Check,
 sowie den Frontend-Build (`yarn build`). Das ersetzt keine vollständige Testsuite, gibt aber
 eine automatische Rückmeldung, bevor kaputter Code auf `main` landet.
+
+
+## UI/UX-Upgrade – Codex (September 2026)
+
+Arbeitsbranch: `codex/ui-ux-system-upgrade`  
+Ausgangsstand: `main@0593332`
+
+### Kurzaudit des Ausgangsstands
+
+Die Anwendung besitzt bereits eine gute technische Basis: ein konsistentes Corporate Design,
+responsive Navigation, DE/EN-Inhalte, semantische Seitenstruktur, sichtbare Fokuszustände,
+SEO-Metadaten, Cookie-Consent sowie funktionsfähige Kontakt- und Admin-Flows. Das größte
+Potenzial lag weniger in einem kompletten Redesign als in der visuellen Hierarchie, dem
+Interaktionsfeedback und der Nutzerführung zwischen den zentralen Einstiegsseiten.
+
+### In diesem Branch umgesetzt
+
+- Designsystem erweitert: flüssige Typografie, präzisere Abstände, Touch-Zielgrößen,
+  vereinheitlichte Transitionen sowie bessere Hover-, Active-, Disabled- und Focus-Zustände.
+- Typografie an der breiten, geometrischen GSF-Wortmarke ausgerichtet: `Archivo` für
+  Headlines, Navigation und Buttons; `Inter` bleibt für Fließtext und `IBM Plex Mono`
+  für technische Mikrotexte erhalten.
+- Offizielle Partnerlogos als optimierte PNG-Assets eingebunden. tesa erhält als Alliance
+  Partner eine vollbreite Featured-Fläche; ECOGRAPH, ISRA VISION und JUST NORMLICHT folgen
+  als drei gleichwertig sichtbare Partnerkarten.
+- Sticky Header aufgewertet: dezente Scroll-Tiefe, Fortschrittsanzeige und nummerierte
+  Mobile-Navigation; das Mobile-Menü schließt nun auch zuverlässig bei Routenwechseln.
+- Hero visuell fokussiert: Karten-/Routenbereich als technisches, klar abgegrenztes Panel.
+- Standort- und Sortimentskacheln auf der Startseite sind nun vollständig klickbar und geben
+  ein eindeutiges visuelles Feedback.
+- Standardisierte Seitenköpfe erhalten eine stärkere Headline-/Intro-Hierarchie.
+- Kontakt-CTA als eindeutiger Conversion-Endpunkt aller Inhaltsseiten überarbeitet.
+- Kontaktformular technisch stabilisiert: Feldkomponente aus dem Renderpfad herausgezogen,
+  konsistentes Autofill-Verhalten sowie zugängliche Inline-Fehlermeldungen ergänzt.
+- `prefers-reduced-motion`, Tastaturbedienung und bestehende Test-IDs bleiben erhalten.
+
+### Zusammenarbeit mit parallelen Coding-Agents
+
+Codex arbeitet ausschließlich auf dem oben genannten Branch. Content-, SEO- und Logo-Arbeiten
+auf `claude/*`-Branches werden nicht verändert. Vor einem Merge sollte `main` in diesen Branch
+aktualisiert, die CI erneut ausgeführt und anschließend gezielt nur der geprüfte PR gemergt werden.
+So bleiben Verantwortungsbereiche, Review und eventuelle Konflikte transparent.

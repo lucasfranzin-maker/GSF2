@@ -1,0 +1,116 @@
+export const PROJECTS_CONTENT = {
+  de: {
+    label: "Projekte",
+    headline: ["Einblicke in unsere", "praktische Arbeit."],
+    intro: "Ausgewählte Aufnahmen aus vergangenen GSF-Projekten zeigen reale Produktionsprozesse in Druck, Qualitätssicherung und industrieller Weiterverarbeitung.",
+    galleryLabel: "Projektgalerie",
+    galleryIntro: "Acht Einblicke aus der Praxis – von der laufenden Druckmaschine bis zur Qualitätskontrolle des fertigen Produkts.",
+    items: [
+      {
+        category: "Drucktechnik",
+        title: "Druckzylinder im Produktionsprozess",
+        text: "Einblick in den laufenden Rotationsdruck mit Fokus auf Zylinderoberfläche und Prozessbeobachtung.",
+        alt: "Druckzylinder in einer laufenden Produktionsmaschine",
+      },
+      {
+        category: "Materialführung",
+        title: "Präzise Bahnführung in der Druckmaschine",
+        text: "Papierbahn und Walzensystem während der maschinellen Verarbeitung.",
+        alt: "Papierbahn zwischen Walzen einer blauen Druckmaschine",
+      },
+      {
+        category: "Qualitätssicherung",
+        title: "Kontrolle direkt an der Maschine",
+        text: "Visuelle Prüfung des Druckbilds während des laufenden Produktionsprozesses.",
+        alt: "Mitarbeiter kontrolliert einen bedruckten Bogen direkt an der Maschine",
+      },
+      {
+        category: "Druckabnahme",
+        title: "Vergleich von Druckbogen und Endprodukt",
+        text: "Abgleich von Farbskalen, Druckbogen und fertigem Magazin als Teil der Qualitätssicherung.",
+        alt: "Vergleich eines Druckbogens mit einem fertig produzierten Magazin",
+      },
+      {
+        category: "Weiterverarbeitung",
+        title: "Transportstrecke in der Produktion",
+        text: "Maschinelle Übergabe bedruckter Produkte in einem automatisierten Weiterverarbeitungsprozess.",
+        alt: "Industrielle Förderstrecke mit bedruckten Produkten",
+      },
+      {
+        category: "Komponentenservice",
+        title: "Aufbereitung technischer Komponenten",
+        text: "Reinigungs- und Aufbereitungsprozess für produktionsrelevante Maschinenteile.",
+        alt: "Technische Komponente in einem blauen Reinigungsbad",
+      },
+      {
+        category: "Produktionstechnik",
+        title: "Automatisierte Verarbeitung in der Linie",
+        text: "Einblick in die maschinelle Zuführung und Verarbeitung innerhalb einer Produktionsanlage.",
+        alt: "Blaue industrielle Produktionsmaschine mit automatischer Materialzuführung",
+      },
+      {
+        category: "Rotationsdruck",
+        title: "Druckbild auf dem laufenden Zylinder",
+        text: "Beobachtung des Druckbilds und der Materialbewegung bei hoher Produktionsgeschwindigkeit.",
+        alt: "Bedrucktes Material auf einem schnell laufenden Rotationszylinder",
+      },
+    ],
+  },
+  en: {
+    label: "Projects",
+    headline: ["Insights into our", "work in practice."],
+    intro: "Selected photographs from past GSF projects show real production processes in printing, quality assurance and industrial finishing.",
+    galleryLabel: "Project gallery",
+    galleryIntro: "Eight practical insights – from the running printing press to quality control of the finished product.",
+    items: [
+      {
+        category: "Print technology",
+        title: "Printing cylinder in production",
+        text: "A view into a live rotary printing process with a focus on the cylinder surface and process observation.",
+        alt: "Printing cylinder in a running production machine",
+      },
+      {
+        category: "Web handling",
+        title: "Precise web guidance in the press",
+        text: "Paper web and roller system during machine processing.",
+        alt: "Paper web running between rollers of a blue printing press",
+      },
+      {
+        category: "Quality assurance",
+        title: "Inspection directly at the press",
+        text: "Visual inspection of the printed image during the running production process.",
+        alt: "Employee inspecting a printed sheet directly at the press",
+      },
+      {
+        category: "Print approval",
+        title: "Comparing print sheet and final product",
+        text: "Checking colour bars, the printed sheet and finished magazine as part of quality assurance.",
+        alt: "Comparison of a printed sheet with a finished magazine",
+      },
+      {
+        category: "Finishing",
+        title: "Production transport system",
+        text: "Machine transfer of printed products in an automated finishing process.",
+        alt: "Industrial conveyor system carrying printed products",
+      },
+      {
+        category: "Component service",
+        title: "Processing technical components",
+        text: "Cleaning and processing of machine components used in production.",
+        alt: "Technical component in a blue cleaning bath",
+      },
+      {
+        category: "Production technology",
+        title: "Automated processing in the line",
+        text: "A view into automated material feeding and processing within a production system.",
+        alt: "Blue industrial production machine with automated material feed",
+      },
+      {
+        category: "Rotary printing",
+        title: "Printed image on the running cylinder",
+        text: "Observing the printed image and material movement at high production speed.",
+        alt: "Printed material on a fast-running rotary cylinder",
+      },
+    ],
+  },
+};

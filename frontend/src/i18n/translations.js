@@ -123,6 +123,12 @@ export const translations = {
       privacy: "Datenschutz",
       rights: "Alle Rechte vorbehalten.",
     },
+    cookieConsent: {
+      message: "Wir verwenden Cookies für anonyme Nutzungsstatistiken, um unsere Website zu verbessern. Diese werden erst aktiviert, wenn Sie zustimmen.",
+      accept: "Alle akzeptieren",
+      reject: "Nur notwendige",
+      linkText: "Mehr in unserer Datenschutzerklärung",
+    },
     pages: {
       ueber: {
         label: "Über GSF",
@@ -410,6 +416,12 @@ export const translations = {
       imprint: "Imprint",
       privacy: "Privacy",
       rights: "All rights reserved.",
+    },
+    cookieConsent: {
+      message: "We use cookies for anonymous usage statistics to improve our website. These are only activated once you agree.",
+      accept: "Accept all",
+      reject: "Necessary only",
+      linkText: "More in our privacy policy",
     },
     pages: {
       ueber: {

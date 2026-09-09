@@ -1,17 +1,18 @@
-# Partner-Logos (austauschbar)
+# Offizielle Partner-Logos
 
-Diese Dateien sind PLATZHALTER (stilistische Nachbildungen) und koennen jederzeit durch
-die offiziellen Logos ersetzt werden, OHNE Code zu aendern.
+Die Homepage verwendet die freigegebenen PNG-Logos direkt aus diesem Verzeichnis:
 
-So ersetzt du ein Logo:
-1. Lege die offizielle Logodatei unter exakt demselben Dateinamen hier ab, z. B.:
-   - tesa.svg
-   - ecograph.svg
-   - isra-vision.svg
-   - just-normlicht.svg
-2. Bevorzugt SVG (skaliert verlustfrei). PNG ist ebenfalls moeglich – dann in
-   /app/frontend/src/components/PartnerLogos.jsx die Dateiendung im PARTNERS-Array anpassen
-   (z. B. "tesa.svg" -> "tesa.png").
-3. Empfohlene Darstellung: transparenter Hintergrund, Logo horizontal, Hoehe ~48px.
+- `tesa.png` – hervorgehobener Alliance Partner
+- `ecograph.png`
+- `isra-vision.png`
+- `just-normlicht.png`
 
-Die Anzeige/Groesse wird zentral in PartnerLogos.jsx gesteuert.
+Die Dateien wurden ausschließlich auf ihren sichtbaren Inhalt zugeschnitten und für die
+Webauslieferung bereinigt. Markenform und Farben bleiben unverändert. Die unterschiedlichen
+Seitenverhältnisse werden zentral in
+`frontend/src/components/PartnerLogos.jsx` normalisiert.
+
+Die früheren SVG-Nachbildungen bleiben vorerst als Fallback/Referenz im Verzeichnis, werden
+von der aktuellen Oberfläche aber nicht mehr geladen. Beim Austausch eines Logos bitte den
+bestehenden PNG-Dateinamen beibehalten und auf ausreichend Auflösung sowie einen sauberen
+transparenten oder zum Logo gehörenden Hintergrund achten.

@@ -221,3 +221,13 @@ gesetzt. Dadurch bleiben sie in jeder Größe scharf und verwenden mit **Archivo
 Schriftfamilie wie Navigation, Headlines, Fließtext, Buttons und technische Labels. Nur
 eigenständige Partnerlogos behalten ihre jeweilige Originaltypografie. Es wurde kein Logo aus
 dem Web und keine fremde Ersatzgrafik verwendet.
+
+
+## Reale Projektgalerie
+
+Die Seite `/projekte` verwendet acht freigegebene Aufnahmen aus vergangenen
+GSF-Projekten. Die Originalbilder werden unter `frontend/public/projects/` als
+performante WebP-Dateien (800 × 533 px) ausgeliefert. Die Galerie ist responsiv,
+verwendet Lazy Loading ab dem dritten Bild und enthält zweisprachige Bildtitel,
+Beschreibungen sowie aussagekräftige Alt-Texte. Die früheren Platzhalterprojekte
+und der Veröffentlichungshinweis wurden entfernt.

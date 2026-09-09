@@ -19,7 +19,7 @@ export default function Home() {
   return (
     <>
       {/* HERO */}
-      <section className="pt-10 md:pt-14 lg:pt-16 pb-4" data-testid="home-hero">
+      <section className="pt-10 md:pt-14 lg:pt-16 pb-8 md:pb-12 bg-white" data-testid="home-hero">
         <div className="gsf-container">
           <SectionLabel label={t.hero.label} />
           <div className="mt-8 grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-8 items-start">
@@ -54,7 +54,7 @@ export default function Home() {
             </div>
 
             {/* Right: map + info */}
-            <div className="lg:col-span-6 xl:col-span-6">
+            <Reveal className="lg:col-span-6 xl:col-span-6 gsf-hero-visual" delay={0.1}>
               <div className="grid grid-cols-1 xl:grid-cols-5 gap-6 items-center">
                 <div className="xl:col-span-3">
                   <RouteMap className="w-full max-w-[440px] mx-auto" labels={{ germany: t.common.germany, southAfrica: t.common.southAfrica }} />
@@ -82,12 +82,12 @@ export default function Home() {
                   </ul>
                 </div>
               </div>
-            </div>
+            </Reveal>
           </div>
         </div>
       </section>
 
-      <div className="gsf-container"><DashedRule className="mt-8" /></div>
+      <div className="gsf-container"><DashedRule /></div>
 
       {/* 02 STANDORTE teaser */}
       <section className="gsf-section" data-testid="home-locations">
@@ -107,16 +107,26 @@ export default function Home() {
             <div className="lg:col-span-7 grid grid-cols-1 sm:grid-cols-2 gap-4">
               {t.locations.items.map((item, i) => (
                 <Reveal key={item.city} delay={i * 0.06}>
-                  <div className="gsf-panel h-full hover:border-[color:var(--gsf-ink)]" data-testid={`location-chip-${i}`}>
+                  <Link
+                    to="/standorte"
+                    className="gsf-panel gsf-card-interactive h-full block"
+                    data-testid={`location-chip-${i}`}
+                    aria-label={`${item.city}: ${item.role}`}
+                  >
                     <div className="flex items-start justify-between">
                       <MapPin size={20} strokeWidth={1.5} style={{ color: "var(--gsf-blue)" }} />
                       <span className="font-mono-tech text-[10px] tracking-[0.18em] uppercase" style={{ color: "var(--gsf-muted)" }}>
                         {String(i + 1).padStart(2, "0")}
                       </span>
                     </div>
-                    <div className="gsf-h3 mt-5">{item.city}</div>
-                    <div className="font-mono-tech text-xs mt-1.5" style={{ color: "var(--gsf-muted)" }}>{item.role}</div>
-                  </div>
+                    <div className="flex items-end justify-between gap-4 mt-5">
+                      <div>
+                        <div className="gsf-h3">{item.city}</div>
+                        <div className="font-mono-tech text-xs mt-1.5" style={{ color: "var(--gsf-muted)" }}>{item.role}</div>
+                      </div>
+                      <ArrowRight size={17} strokeWidth={1.8} className="gsf-arrow shrink-0" style={{ color: "var(--gsf-blue)" }} />
+                    </div>
+                  </Link>
                 </Reveal>
               ))}
             </div>
@@ -195,11 +205,19 @@ export default function Home() {
           <div className="mt-10 grid grid-cols-1 md:grid-cols-2 gap-px" style={{ background: "var(--gsf-border)" }}>
             {t.sortiment.items.map((item, i) => (
               <Reveal key={item.title} delay={i * 0.05}>
-                <div className="bg-white p-8 h-full flex flex-col" data-testid={`sortiment-item-${i}`}>
-                  <span className="font-mono-tech text-xs" style={{ color: "var(--gsf-blue)" }}>{String(i + 1).padStart(2, "0")}</span>
+                <Link
+                  to="/sortiment"
+                  className="gsf-card-interactive bg-white p-8 h-full flex flex-col"
+                  data-testid={`sortiment-item-${i}`}
+                  aria-label={item.title}
+                >
+                  <div className="flex items-start justify-between gap-4">
+                    <span className="font-mono-tech text-xs" style={{ color: "var(--gsf-blue)" }}>{String(i + 1).padStart(2, "0")}</span>
+                    <ArrowRight size={17} strokeWidth={1.8} className="gsf-arrow" style={{ color: "var(--gsf-blue)" }} />
+                  </div>
                   <h3 className="gsf-h3 mt-4">{item.title}</h3>
                   <p className="gsf-body mt-3 max-w-md">{item.text}</p>
-                </div>
+                </Link>
               </Reveal>
             ))}
           </div>

@@ -165,6 +165,12 @@ Interaktionsfeedback und der Nutzerführung zwischen den zentralen Einstiegsseit
 
 - Designsystem erweitert: flüssige Typografie, präzisere Abstände, Touch-Zielgrößen,
   vereinheitlichte Transitionen sowie bessere Hover-, Active-, Disabled- und Focus-Zustände.
+- Typografie an der breiten, geometrischen GSF-Wortmarke ausgerichtet: `Archivo` für
+  Headlines, Navigation und Buttons; `Inter` bleibt für Fließtext und `IBM Plex Mono`
+  für technische Mikrotexte erhalten.
+- Offizielle Partnerlogos als optimierte PNG-Assets eingebunden. tesa erhält als Alliance
+  Partner eine vollbreite Featured-Fläche; ECOGRAPH, ISRA VISION und JUST NORMLICHT folgen
+  als drei gleichwertig sichtbare Partnerkarten.
 - Sticky Header aufgewertet: dezente Scroll-Tiefe, Fortschrittsanzeige und nummerierte
   Mobile-Navigation; das Mobile-Menü schließt nun auch zuverlässig bei Routenwechseln.
 - Hero visuell fokussiert: Karten-/Routenbereich als technisches, klar abgegrenztes Panel.

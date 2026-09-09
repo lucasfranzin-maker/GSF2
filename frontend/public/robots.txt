@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://distribution-de.preview.emergentagent.com/sitemap.xml
+Sitemap: https://www.franzin.de/sitemap.xml

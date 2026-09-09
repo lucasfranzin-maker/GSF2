@@ -8,11 +8,13 @@ import { Reveal } from "@/components/Reveal";
 import { PartnerLogoGrid, TesaLogo } from "@/components/PartnerLogos";
 import { ContactCTA } from "@/components/ContactCTA";
 import { useLang } from "@/i18n/LanguageContext";
+import { useDocumentMeta } from "@/hooks/useDocumentMeta";
 
 const STRENGTH_ICONS = [Ship, ShieldCheck, Layers, Headset];
 
 export default function Home() {
   const { t, lang } = useLang();
+  useDocumentMeta({ description: t.hero.lead, path: "/" });
 
   return (
     <>

@@ -4,6 +4,7 @@ import { PageHeader } from "@/components/PageHeader";
 import { Reveal } from "@/components/Reveal";
 import { ContactCTA } from "@/components/ContactCTA";
 import { useLang } from "@/i18n/LanguageContext";
+import { useDocumentMeta } from "@/hooks/useDocumentMeta";
 
 const ICONS = [Layers, Boxes, Factory, Truck];
 
@@ -11,6 +12,7 @@ export default function Sortiment() {
   const { t } = useLang();
   const p = t.pages.sortiment;
   const items = t.sortiment.items;
+  useDocumentMeta({ title: p.label, description: p.intro, path: "/sortiment" });
   return (
     <>
       <PageHeader label={p.label} icon={Layers} headline={p.headline} intro={p.intro} />

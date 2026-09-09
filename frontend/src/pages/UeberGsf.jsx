@@ -6,10 +6,12 @@ import { Reveal } from "@/components/Reveal";
 import { ContactCTA } from "@/components/ContactCTA";
 import { RouteMap } from "@/components/RouteMap";
 import { useLang } from "@/i18n/LanguageContext";
+import { useDocumentMeta } from "@/hooks/useDocumentMeta";
 
 export default function UeberGsf() {
   const { t } = useLang();
   const p = t.pages.ueber;
+  useDocumentMeta({ title: p.label, description: p.intro, path: "/ueber-gsf" });
   return (
     <>
       <PageHeader label={p.label} icon={Info} headline={p.headline} intro={p.intro} />

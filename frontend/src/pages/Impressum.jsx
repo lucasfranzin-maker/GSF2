@@ -3,10 +3,16 @@ import { FileText } from "lucide-react";
 import { PageHeader } from "@/components/PageHeader";
 import { useLang } from "@/i18n/LanguageContext";
 import { LOCATIONS_CONTACT } from "@/i18n/translations";
+import { useDocumentMeta } from "@/hooks/useDocumentMeta";
 
 export default function Impressum() {
   const { lang } = useLang();
   const de = lang === "de";
+  useDocumentMeta({
+    title: de ? "Impressum" : "Imprint",
+    description: de ? "Angaben gemäß den gesetzlichen Anforderungen." : "Legal information as required by law.",
+    path: "/impressum",
+  });
   const Row = ({ label, value }) => (
     <div className="grid grid-cols-1 sm:grid-cols-3 gap-1 sm:gap-4 py-3" style={{ borderBottom: "1px solid var(--gsf-border)" }}>
       <div className="font-mono-tech text-[11px] uppercase tracking-[0.16em]" style={{ color: "var(--gsf-muted)" }}>{label}</div>

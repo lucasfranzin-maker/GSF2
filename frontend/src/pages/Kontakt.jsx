@@ -7,6 +7,7 @@ import { Reveal } from "@/components/Reveal";
 import { DashedRule } from "@/components/DashedRule";
 import { useLang } from "@/i18n/LanguageContext";
 import { LOCATIONS_CONTACT } from "@/i18n/translations";
+import { useDocumentMeta } from "@/hooks/useDocumentMeta";
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 const API = `${BACKEND_URL}/api`;
@@ -19,6 +20,7 @@ export default function Kontakt() {
   const { t, lang } = useLang();
   const p = t.pages.kontakt;
   const f = p.form;
+  useDocumentMeta({ title: p.label, description: p.intro, path: "/kontakt" });
 
   const [form, setForm] = useState({ ...EMPTY_FORM });
   const [errors, setErrors] = useState({});

@@ -4,12 +4,14 @@ import { PageHeader } from "@/components/PageHeader";
 import { Reveal } from "@/components/Reveal";
 import { ContactCTA } from "@/components/ContactCTA";
 import { useLang } from "@/i18n/LanguageContext";
+import { useDocumentMeta } from "@/hooks/useDocumentMeta";
 
 const ICONS = [Palette, Layers, Truck, Factory, Leaf, MapPin];
 
 export default function Projekte() {
   const { t } = useLang();
   const p = t.pages.projekte;
+  useDocumentMeta({ title: p.label, description: p.intro, path: "/projekte" });
 
   return (
     <>

@@ -6,12 +6,14 @@ import { Reveal } from "@/components/Reveal";
 import { DashedRule } from "@/components/DashedRule";
 import { TesaLogo } from "@/components/PartnerLogos";
 import { useLang } from "@/i18n/LanguageContext";
+import { useDocumentMeta } from "@/hooks/useDocumentMeta";
 
 const APP_ICONS = [Layers, Wrench, ShieldCheck, Truck];
 
 export default function Tesa() {
   const { t } = useLang();
   const p = t.pages.tesa;
+  useDocumentMeta({ title: p.label, description: p.intro, path: "/tesa" });
   return (
     <>
       <PageHeader label={p.label} icon={ShieldCheck} headline={p.headline} intro={p.intro} />

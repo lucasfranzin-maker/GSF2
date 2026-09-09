@@ -7,6 +7,7 @@ import { DashedRule } from "@/components/DashedRule";
 import { ContactCTA } from "@/components/ContactCTA";
 import { useLang } from "@/i18n/LanguageContext";
 import { LOCATIONS_CONTACT } from "@/i18n/translations";
+import { useDocumentMeta } from "@/hooks/useDocumentMeta";
 
 // Physical addresses that get an embedded map + directions link (Cape Town, Durban).
 const MAP_ADDRESSES = {
@@ -21,6 +22,7 @@ export default function Standorte() {
   const { t, lang } = useLang();
   const p = t.pages.standorte;
   const directionsLabel = lang === "de" ? "Route planen" : "Get directions";
+  useDocumentMeta({ title: p.label, description: p.intro, path: "/standorte" });
 
   return (
     <>

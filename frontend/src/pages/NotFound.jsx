@@ -2,10 +2,12 @@ import React from "react";
 import { Link } from "react-router-dom";
 import { ArrowRight } from "lucide-react";
 import { useLang } from "@/i18n/LanguageContext";
+import { useDocumentMeta } from "@/hooks/useDocumentMeta";
 
 export default function NotFound() {
   const { lang } = useLang();
   const de = lang === "de";
+  useDocumentMeta({ title: de ? "Seite nicht gefunden" : "Page not found", description: de ? "Die angeforderte Seite existiert nicht." : "The requested page does not exist." });
   return (
     <section className="gsf-section">
       <div className="gsf-container text-center py-24">

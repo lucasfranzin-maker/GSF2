@@ -33,6 +33,11 @@
     --gsf-radius-lg: 18px;
     --gsf-transition: 180ms cubic-bezier(0.2, 0.8, 0.2, 1);
 
+    /* Typography follows the broad, geometric GSF wordmark. */
+    --gsf-font-display: "Archivo", "Arial", system-ui, sans-serif;
+    --gsf-font-body: "Inter", system-ui, -apple-system, "Segoe UI", sans-serif;
+    --gsf-font-tech: "IBM Plex Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+
     /* shadcn token mapping -> GSF palette */
     --background: 210 33% 98%;
     --foreground: 216 65% 12%;
@@ -72,7 +77,7 @@
     overflow-x: hidden;
     background-color: var(--gsf-bg);
     color: var(--gsf-ink);
-    font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    font-family: var(--gsf-font-body);
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     text-rendering: optimizeLegibility;
@@ -112,26 +117,32 @@
     @apply py-14 md:py-20 lg:py-24;
   }
   .font-head {
-    font-family: "Roboto Condensed", "Arial Narrow", system-ui, sans-serif;
+    font-family: var(--gsf-font-display);
   }
   .font-mono-tech {
-    font-family: "IBM Plex Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+    font-family: var(--gsf-font-tech);
   }
   .gsf-h1 {
-    @apply font-head uppercase font-bold tracking-[0.01em];
+    @apply font-head uppercase;
     color: var(--gsf-ink);
-    font-size: clamp(2.65rem, 5.5vw, 4.75rem);
-    line-height: 0.94;
+    font-size: clamp(2.55rem, 5.2vw, 4.6rem);
+    font-weight: 800;
+    letter-spacing: -0.035em;
+    line-height: 0.9;
   }
   .gsf-h2 {
-    @apply font-head uppercase font-bold tracking-[0.01em];
+    @apply font-head uppercase;
     color: var(--gsf-ink);
-    font-size: clamp(2rem, 3.5vw, 3rem);
-    line-height: 1;
+    font-size: clamp(1.95rem, 3.35vw, 2.9rem);
+    font-weight: 800;
+    letter-spacing: -0.025em;
+    line-height: 0.96;
   }
   .gsf-h3 {
-    @apply font-head uppercase font-bold leading-tight tracking-[0.01em] text-lg sm:text-xl;
+    @apply font-head uppercase leading-tight text-lg sm:text-xl;
     color: var(--gsf-ink);
+    font-weight: 700;
+    letter-spacing: -0.01em;
   }
   .gsf-kicker {
     @apply font-mono-tech text-[11px] sm:text-xs font-medium tracking-[0.22em] uppercase;
@@ -149,8 +160,9 @@
     min-height: 44px;
     position: relative;
     isolation: isolate;
-    font-family: "Roboto Condensed", sans-serif;
-    letter-spacing: 0.06em;
+    font-family: var(--gsf-font-display);
+    font-weight: 700;
+    letter-spacing: 0.045em;
     transition:
       background-color var(--gsf-transition),
       border-color var(--gsf-transition),
@@ -191,7 +203,8 @@
   .gsf-link {
     @apply inline-flex items-center gap-2 text-xs sm:text-sm font-semibold uppercase tracking-[0.12em];
     color: var(--gsf-ink);
-    font-family: "Roboto Condensed", sans-serif;
+    font-family: var(--gsf-font-display);
+    font-weight: 700;
     min-height: 44px;
     transition: color var(--gsf-transition);
   }

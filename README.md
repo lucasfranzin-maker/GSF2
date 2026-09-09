@@ -231,3 +231,20 @@ performante WebP-Dateien (800 × 533 px) ausgeliefert. Die Galerie ist responsiv
 verwendet Lazy Loading ab dem dritten Bild und enthält zweisprachige Bildtitel,
 Beschreibungen sowie aussagekräftige Alt-Texte. Die früheren Platzhalterprojekte
 und der Veröffentlichungshinweis wurden entfernt.
+
+
+## Redesign – Zwischenstand 1
+
+Branch: `feature/gpt6-highend-redesign`. Dieser Entwurf ist ausschließlich zur
+Designprüfung bestimmt. Kein Merge oder Produktions-Deployment ohne ausdrückliche
+Freigabe des Auftraggebers.
+
+- Startseite mit dunklem Hero, echter GSF-Produktion als Leitmotiv und klaren Kontaktwegen.
+- Helle Kontrastflächen, hervorgehobene tesa-Partnerschaft und drei direkte Projekteinstiege.
+- Archivo bleibt die gemeinsame Schriftfamilie; Partnerlogos behalten ihre Originalform.
+- Bestehende Framer-Motion-Reveals; Hover-Effekte mit Transform, Fokuszustände und
+  Berücksichtigung von reduzierter Bewegung. Keine zusätzlichen Animation-Abhängigkeiten.
+
+Noch offen: vollständige visuelle Desktop-/Mobilprüfung, Überarbeitung aller Unterseiten,
+abschließende Performanceprüfung und Screenshots der laufenden Anwendung. Dieser
+Zwischenstand ist kein fertig abgenommenes Gesamtdesign und enthält keine 60-fps-Garantie.

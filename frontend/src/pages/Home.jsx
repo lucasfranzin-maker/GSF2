@@ -1,7 +1,7 @@
 import React from "react";
 import { Link } from "react-router-dom";
-import { ArrowRight, MapPin, Ship, ShieldCheck, Layers, Headset, Globe, Handshake } from "lucide-react";
-import { RouteMap } from "@/components/RouteMap";
+import { ArrowRight, MapPin, Ship, ShieldCheck, Layers, Headset, Handshake } from "lucide-react";
+import { PROJECTS_CONTENT } from "@/content/projects";
 import { SectionLabel } from "@/components/SectionLabel";
 import { DashedRule } from "@/components/DashedRule";
 import { Reveal } from "@/components/Reveal";
@@ -16,10 +16,12 @@ export default function Home() {
   const { t, lang } = useLang();
   useDocumentMeta({ description: t.hero.lead, path: "/" });
 
+  const project = PROJECTS_CONTENT[lang] || PROJECTS_CONTENT.de;
+
   return (
     <>
       {/* HERO */}
-      <section className="pt-10 md:pt-14 lg:pt-16 pb-8 md:pb-12 bg-white" data-testid="home-hero">
+      <section className="gsf-premium-hero" data-testid="home-hero">
         <div className="gsf-container">
           <SectionLabel label={t.hero.label} />
           <div className="mt-8 grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-8 items-start">
@@ -53,34 +55,19 @@ export default function Home() {
               </Reveal>
             </div>
 
-            {/* Right: map + info */}
-            <Reveal className="lg:col-span-6 xl:col-span-6 gsf-hero-visual" delay={0.1}>
-              <div className="grid grid-cols-1 xl:grid-cols-5 gap-6 items-center">
-                <div className="xl:col-span-3">
-                  <RouteMap className="w-full max-w-[440px] mx-auto" labels={{ germany: t.common.germany, southAfrica: t.common.southAfrica }} />
+            <Reveal className="lg:col-span-6 gsf-production-visual" delay={0.1}>
+              <Link to="/projekte" className="gsf-production-link">
+                <img src="/projects/gsf-project-1.webp" width="800" height="533"
+                  alt={project.items[0].alt} fetchPriority="high" className="gsf-production-image" />
+                <div className="gsf-production-caption">
+                  <span><span className="gsf-production-eyebrow">GSF / PRINT ENGINEERING</span>
+                    <strong>{lang === "de" ? "Präzision. In der Praxis." : "Precision. In practice."}</strong></span>
+                  <ArrowRight size={24} aria-hidden="true" />
                 </div>
-                <div className="xl:col-span-2 flex flex-col gap-6">
-                  <div>
-                    <div className="gsf-kicker">{t.hero.panelTitle}</div>
-                    <p className="gsf-body mt-2 text-sm">{t.hero.panelSubtitle}</p>
-                  </div>
-                  <DashedRule />
-                  <div className="flex items-start gap-3">
-                    <Globe size={18} strokeWidth={1.5} style={{ color: "var(--gsf-blue)" }} className="mt-0.5 shrink-0" />
-                    <p className="gsf-body text-sm">
-                      <span className="font-semibold" style={{ color: "var(--gsf-ink)" }}>tesa Alliance</span> {lang === "de" ? "Partner in Südafrika." : "Partner in South Africa."}
-                    </p>
-                  </div>
-                  <DashedRule />
-                  <ul className="flex flex-col gap-2.5">
-                    {t.hero.pins.map((p) => (
-                      <li key={p} className="flex items-center gap-2.5 gsf-body text-sm">
-                        <MapPin size={15} strokeWidth={1.5} style={{ color: "var(--gsf-blue)" }} />
-                        {p}
-                      </li>
-                    ))}
-                  </ul>
-                </div>
+              </Link>
+              <div className="gsf-production-footnote">
+                <span>{t.common.germany} ↔ {t.common.southAfrica}</span>
+                <span>tesa Alliance Partner</span>
               </div>
             </Reveal>
           </div>
@@ -162,7 +149,7 @@ export default function Home() {
       </section>
 
       {/* 04 TESA */}
-      <section className="gsf-section" style={{ background: "var(--gsf-surface-2)" }} data-testid="home-tesa">
+      <section className="gsf-section gsf-premium-tesa" data-testid="home-tesa">
         <div className="gsf-container">
           <SectionLabel label={t.tesa.label} />
           <div className="mt-10 grid grid-cols-1 lg:grid-cols-12 gap-10 items-center">
@@ -229,6 +216,27 @@ export default function Home() {
       </section>
 
       <div className="gsf-container"><DashedRule /></div>
+
+      <section className="gsf-section gsf-project-preview" aria-labelledby="project-preview-title">
+        <div className="gsf-container">
+          <SectionLabel label={project.label} />
+          <div className="gsf-project-heading">
+            <h2 id="project-preview-title" className="gsf-h2">{lang === "de" ? "Technik, die weiterbringt." : "Engineering that moves you forward."}</h2>
+            <Link to="/projekte" className="gsf-link">{lang === "de" ? "Alle Projekte" : "All projects"} <ArrowRight size={18} /></Link>
+          </div>
+          <div className="gsf-project-grid">
+            {[0, 2, 3].map((index) => (
+              <Reveal key={index}>
+                <Link to="/projekte" className="gsf-project-tile">
+                  <div className="gsf-project-photo"><img src={`/projects/gsf-project-${index + 1}.webp`} width="800" height="533" loading="lazy" alt={project.items[index].alt} /></div>
+                  <span className="gsf-kicker">{project.items[index].category}</span>
+                  <h3 className="gsf-h3">{project.items[index].title}</h3>
+                </Link>
+              </Reveal>
+            ))}
+          </div>
+        </div>
+      </section>
 
       {/* 06 PARTNER */}
       <section className="gsf-section" data-testid="home-partners">

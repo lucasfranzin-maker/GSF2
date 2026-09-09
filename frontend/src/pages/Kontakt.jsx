@@ -15,6 +15,9 @@ const API = `${BACKEND_URL}/api`;
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 const EMPTY_FORM = { name: "", company: "", email: "", phone: "", location: "", subject: "", message: "", website: "" };
+const INPUT_BASE = "gsf-input w-full rounded-[8px] border bg-white px-4 py-3 text-[15px] outline-none";
+const LABEL_CLASS = "block font-mono-tech text-[11px] uppercase tracking-[0.16em] mb-2";
+const AUTO_COMPLETE = { name: "name", company: "organization", email: "email", phone: "tel", subject: "off" };
 
 export default function Kontakt() {
   const { t, lang } = useLang();
@@ -62,30 +65,6 @@ export default function Kontakt() {
     }
   };
 
-  const inputBase = "w-full rounded-[8px] border bg-white px-4 py-3 text-[15px] transition-colors duration-150 outline-none";
-  const inputStyle = (invalid) => ({ borderColor: invalid ? "var(--gsf-danger)" : "var(--gsf-border)", color: "var(--gsf-ink)" });
-  const labelCls = "block font-mono-tech text-[11px] uppercase tracking-[0.16em] mb-2";
-
-  const Field = ({ id, k, type = "text", required, half }) => (
-    <div className={half ? "" : "sm:col-span-2"}>
-      <label htmlFor={id} className={labelCls} style={{ color: "var(--gsf-muted)" }}>
-        {f[k]} {required ? <span style={{ color: "var(--gsf-danger)" }}>*</span> : null}
-      </label>
-      <input
-        id={id}
-        type={type}
-        value={form[k]}
-        onChange={setField(k)}
-        className={inputBase}
-        style={inputStyle(errors[k])}
-        data-testid={`contact-form-${k}-input`}
-        aria-invalid={!!errors[k]}
-        aria-required={!!required}
-      />
-      {errors[k] === "email" ? <p className="mt-1.5 text-xs" style={{ color: "var(--gsf-danger)" }}>{f.errorEmail}</p> : null}
-    </div>
-  );
-
   return (
     <>
       <PageHeader label={p.label} icon={Mail} headline={p.headline} intro={p.intro} />
@@ -123,19 +102,19 @@ export default function Kontakt() {
                 </div>
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
-                  <Field id="cf-name" k="name" required half />
-                  <Field id="cf-company" k="company" required half />
-                  <Field id="cf-email" k="email" type="email" required half />
-                  <Field id="cf-phone" k="phone" half />
+                  <ContactField id="cf-name" field="name" required form={form} errors={errors} labels={f} onChange={setField} />
+                  <ContactField id="cf-company" field="company" required form={form} errors={errors} labels={f} onChange={setField} />
+                  <ContactField id="cf-email" field="email" type="email" required form={form} errors={errors} labels={f} onChange={setField} />
+                  <ContactField id="cf-phone" field="phone" form={form} errors={errors} labels={f} onChange={setField} />
 
                   <div className="">
-                    <label htmlFor="cf-location" className={labelCls} style={{ color: "var(--gsf-muted)" }}>{f.location}</label>
+                    <label htmlFor="cf-location" className={LABEL_CLASS} style={{ color: "var(--gsf-muted)" }}>{f.location}</label>
                     <select
                       id="cf-location"
                       value={form.location}
                       onChange={setField("location")}
-                      className={inputBase}
-                      style={inputStyle(false)}
+                      className={INPUT_BASE}
+                      style={fieldStyle(false)}
                       data-testid="contact-form-location-select"
                     >
                       <option value="">{f.locationPlaceholder}</option>
@@ -145,10 +124,10 @@ export default function Kontakt() {
                     </select>
                   </div>
 
-                  <Field id="cf-subject" k="subject" half />
+                  <ContactField id="cf-subject" field="subject" form={form} errors={errors} labels={f} onChange={setField} />
 
                   <div className="sm:col-span-2">
-                    <label htmlFor="cf-message" className={labelCls} style={{ color: "var(--gsf-muted)" }}>
+                    <label htmlFor="cf-message" className={LABEL_CLASS} style={{ color: "var(--gsf-muted)" }}>
                       {f.message} <span style={{ color: "var(--gsf-danger)" }}>*</span>
                     </label>
                     <textarea
@@ -156,8 +135,8 @@ export default function Kontakt() {
                       rows={6}
                       value={form.message}
                       onChange={setField("message")}
-                      className={inputBase + " resize-y"}
-                      style={inputStyle(errors.message)}
+                      className={INPUT_BASE + " resize-y"}
+                      style={fieldStyle(errors.message)}
                       data-testid="contact-form-message-textarea"
                       aria-invalid={!!errors.message}
                       aria-required
@@ -218,6 +197,43 @@ export default function Kontakt() {
     </>
   );
 }
+
+const fieldStyle = (invalid) => ({
+  borderColor: invalid ? "var(--gsf-danger)" : "var(--gsf-border)",
+  color: "var(--gsf-ink)",
+});
+
+const ContactField = ({ id, field, type = "text", required, form, errors, labels, onChange }) => {
+  const errorId = `${id}-error`;
+  const error = errors[field];
+
+  return (
+    <div>
+      <label htmlFor={id} className={LABEL_CLASS} style={{ color: "var(--gsf-muted)" }}>
+        {labels[field]} {required ? <span style={{ color: "var(--gsf-danger)" }}>*</span> : null}
+      </label>
+      <input
+        id={id}
+        name={field}
+        type={type}
+        value={form[field]}
+        onChange={onChange(field)}
+        autoComplete={AUTO_COMPLETE[field]}
+        className={INPUT_BASE}
+        style={fieldStyle(error)}
+        data-testid={`contact-form-${field}-input`}
+        aria-invalid={!!error}
+        aria-required={!!required}
+        aria-describedby={error ? errorId : undefined}
+      />
+      {error ? (
+        <p id={errorId} className="mt-1.5 text-xs" style={{ color: "var(--gsf-danger)" }} role="alert">
+          {error === "email" ? labels.errorEmail : `${labels[field]} – ${labels.required}`}
+        </p>
+      ) : null}
+    </div>
+  );
+};
 
 const ContactBlock = ({ icon: Icon, title, lines }) => (
   <div className="flex items-start gap-3">

@@ -111,6 +111,7 @@ export default function Kontakt() {
                     <label htmlFor="cf-location" className={LABEL_CLASS} style={{ color: "var(--gsf-muted)" }}>{f.location}</label>
                     <select
                       id="cf-location"
+                      name="location"
                       value={form.location}
                       onChange={setField("location")}
                       className={INPUT_BASE}
@@ -140,7 +141,13 @@ export default function Kontakt() {
                       data-testid="contact-form-message-textarea"
                       aria-invalid={!!errors.message}
                       aria-required
+                      aria-describedby={errors.message ? "cf-message-error" : undefined}
                     />
+                    {errors.message ? (
+                      <p id="cf-message-error" className="mt-1.5 text-xs" style={{ color: "var(--gsf-danger)" }} role="alert">
+                        {f.message} – {f.required}
+                      </p>
+                    ) : null}
                   </div>
                 </div>
 

@@ -32,7 +32,7 @@ export const translations = {
     },
     hero: {
       label: "01 / Startseite",
-      headline: ["Print Engineering aus Deutschland,", "zuverlässig in Südafrika"],
+      headline: ["Print Engineering aus Deutschland", "zuverlässig in Südafrika"],
       lead: "Wir importieren und distribuieren Produkte für die grafische Industrie sowie tesa Klebebandlösungen aus Deutschland nach Südafrika.",
       sub: "Mit eigenen Standorten in Cape Town und Durban sowie Vertriebsaktivitäten bis Johannesburg sind wir nah an unseren Kunden und Märkten.",
       ctaNote: "Ihr Partner für Druck, Klebeband und technische Lösungen.",
@@ -326,7 +326,7 @@ export const translations = {
     },
     hero: {
       label: "01 / Home",
-      headline: ["Print engineering from Germany,", "reliable in South Africa"],
+      headline: ["Print engineering from Germany", "reliable in South Africa"],
       lead: "We import and distribute products for the graphic industry as well as tesa adhesive tape solutions from Germany to South Africa.",
       sub: "With our own locations in Cape Town and Durban and sales activities reaching Johannesburg, we stay close to our customers and markets.",
       ctaNote: "Your partner for print, adhesive tape and technical solutions.",

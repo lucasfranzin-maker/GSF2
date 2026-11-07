@@ -24,9 +24,9 @@ export default function Home() {
       <section className="gsf-premium-hero" data-testid="home-hero">
         <div className="gsf-container">
           <SectionLabel label={t.hero.label} />
-          <div className="mt-8 grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-8 items-start">
+          <div className="gsf-hero-grid mt-8 grid grid-cols-1 xl:grid-cols-12 gap-10 xl:gap-8 items-start">
             {/* Left: copy */}
-            <div className="lg:col-span-6 xl:col-span-6">
+            <div className="gsf-hero-copy xl:col-span-6">
               <Reveal>
                 <h1 className="gsf-h1">
                   {t.hero.headline.map((line, i) => (
@@ -55,7 +55,7 @@ export default function Home() {
               </Reveal>
             </div>
 
-            <Reveal className="lg:col-span-6 gsf-production-visual" delay={0.1}>
+            <Reveal className="xl:col-span-6 gsf-production-visual" delay={0.1}>
               <Link to="/projekte" className="gsf-production-link">
                 <img src="/projects/gsf-project-1.webp" width="800" height="533"
                   alt={project.items[0].alt} fetchPriority="high" className="gsf-production-image" />

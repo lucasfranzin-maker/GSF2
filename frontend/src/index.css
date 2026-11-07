@@ -390,7 +390,9 @@
   color: var(--gsf-ink);
   padding: clamp(40px, 6vw, 96px) 0 48px;
 }
-.gsf-premium-hero .gsf-h1 { font-size: clamp(2.8rem, 5.2vw, 5.6rem); line-height: 1.02; letter-spacing: -.055em; }
+.gsf-hero-grid > * { min-width: 0; }
+.gsf-hero-copy { position: relative; }
+.gsf-premium-hero .gsf-h1 { font-size: clamp(2.4rem, 4.4vw, 4.8rem); line-height: 1.05; letter-spacing: -.045em; overflow-wrap: anywhere; }
 .gsf-premium-hero .gsf-btn-primary { background: #0b5fff; color: white; }
 .gsf-premium-hero .gsf-btn-primary:hover { background: #064cc5; }
 .gsf-premium-hero .gsf-btn-primary:active { transform: scale(.98); }

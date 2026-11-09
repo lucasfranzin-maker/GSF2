@@ -1,6 +1,6 @@
-import React from "react";
+import React, { useState } from "react";
 import { Link } from "react-router-dom";
-import { ArrowRight, MapPin, Ship, ShieldCheck, Layers, Headset, Handshake } from "lucide-react";
+import { ArrowLeft, ArrowRight, MapPin, Ship, ShieldCheck, Layers, Headset, Handshake } from "lucide-react";
 import { PROJECTS_CONTENT } from "@/content/projects";
 import { SectionLabel } from "@/components/SectionLabel";
 import { DashedRule } from "@/components/DashedRule";
@@ -17,59 +17,46 @@ export default function Home() {
   useDocumentMeta({ description: t.hero.lead, path: "/" });
 
   const project = PROJECTS_CONTENT[lang] || PROJECTS_CONTENT.de;
+  const [activePhoto, setActivePhoto] = useState(0);
+  const changePhoto = (step) => setActivePhoto((index) => (index + step + project.items.length) % project.items.length);
 
   return (
-    <>
-      {/* HERO */}
-      <section className="gsf-premium-hero" data-testid="home-hero">
-        <div className="gsf-container">
-          <SectionLabel label={t.hero.label} />
-          <div className="gsf-hero-grid mt-8 grid grid-cols-1 xl:grid-cols-12 gap-10 xl:gap-8 items-start">
-            {/* Left: copy */}
-            <div className="gsf-hero-copy xl:col-span-6">
-              <Reveal>
-                <h1 className="gsf-h1">
-                  {t.hero.headline.map((line, i) => (
-                    <span key={i} className="block">{line}</span>
-                  ))}
-                </h1>
-              </Reveal>
-              <Reveal delay={0.08}>
-                <p className="gsf-body mt-7 max-w-xl text-[color:var(--gsf-ink-2)]">{t.hero.lead}</p>
-                <p className="gsf-body mt-4 max-w-xl">{t.hero.sub}</p>
-              </Reveal>
-              <Reveal delay={0.16}>
-                <div className="mt-9 flex flex-col sm:flex-row sm:items-center gap-5">
-                  <Link to="/kontakt" className="gsf-btn-primary" data-testid="hero-contact-cta">
-                    {t.common.contactCta}
-                    <ArrowRight size={16} strokeWidth={2} className="gsf-arrow" />
-                  </Link>
-                  <Link to="/standorte" className="gsf-link" data-testid="hero-locations-link">
-                    {t.common.toLocations}
-                    <ArrowRight size={15} strokeWidth={2} className="gsf-arrow" />
-                  </Link>
-                </div>
-                <p className="mt-6 font-mono-tech text-xs max-w-xs" style={{ color: "var(--gsf-muted)" }}>
-                  {t.hero.ctaNote}
-                </p>
-              </Reveal>
-            </div>
-
-            <Reveal className="xl:col-span-6 gsf-production-visual" delay={0.1}>
-              <Link to="/projekte" className="gsf-production-link">
-                <img src="/projects/gsf-project-1.webp" width="800" height="533"
-                  alt={project.items[0].alt} fetchPriority="high" className="gsf-production-image" />
-                <div className="gsf-production-caption">
-                  <span><span className="gsf-production-eyebrow">GSF / PRINT ENGINEERING</span>
-                    <strong>{lang === "de" ? "Präzision. In der Praxis." : "Precision. In practice."}</strong></span>
-                  <ArrowRight size={24} aria-hidden="true" />
-                </div>
-              </Link>
-              <div className="gsf-production-footnote">
-                <span>{t.common.germany} ↔ {t.common.southAfrica}</span>
-                <span>tesa Alliance Partner</span>
-              </div>
-            </Reveal>
+    <div className="gsf-classic-home">
+      <section className="gsf-classic-intro" data-testid="home-hero">
+        <div className="gsf-classic-company">
+          <span className="gsf-kicker">PRINT ENGINEERING SOLUTIONS</span>
+          <h1>GRAFIK SERVICE FRANZIN <span>(Pty) Ltd.</span></h1>
+          <p>Cape Town <span>·</span> Durban <span>·</span> Johannesburg <span>·</span> Hamburg</p>
+        </div>
+        <div className="gsf-classic-gallery" role="region" aria-roledescription="carousel"
+          aria-label={lang === "de" ? "Einblicke in unsere Projekte" : "Our projects in pictures"}>
+          <div className="gsf-classic-stage">
+            {project.items.map((item, index) => {
+              let offset = (index - activePhoto + project.items.length) % project.items.length;
+              if (offset > project.items.length / 2) offset -= project.items.length;
+              return (
+                <button key={index} type="button" className="gsf-classic-slide" data-offset={offset}
+                  hidden={Math.abs(offset) > 2} tabIndex={offset === 0 ? 0 : -1}
+                  aria-label={`${lang === "de" ? "Bild" : "Photo"} ${index + 1}: ${item.title}`}
+                  aria-current={offset === 0 ? "true" : undefined} onClick={() => setActivePhoto(index)}>
+                  <img src={`/projects/gsf-project-${index + 1}.webp`} width="800" height="533" alt={item.alt}
+                    loading={index < 3 ? "eager" : "lazy"} />
+                </button>
+              );
+            })}
+          </div>
+          <div className="gsf-classic-gallery-controls">
+            <button type="button" onClick={() => changePhoto(-1)} aria-label={lang === "de" ? "Vorheriges Bild" : "Previous photo"}><ArrowLeft size={18} /></button>
+            <p aria-live="polite" aria-atomic="true"><span>{String(activePhoto + 1).padStart(2, "0")} / {String(project.items.length).padStart(2, "0")}</span>{project.items[activePhoto].title}</p>
+            <button type="button" onClick={() => changePhoto(1)} aria-label={lang === "de" ? "Nächstes Bild" : "Next photo"}><ArrowRight size={18} /></button>
+          </div>
+        </div>
+        <div className="gsf-classic-welcome">
+          <h2>{t.hero.headline.join(" ")}</h2>
+          <p>{t.hero.lead}</p><p>{t.hero.sub}</p>
+          <div className="gsf-classic-actions">
+            <Link to="/kontakt" className="gsf-btn-primary" data-testid="hero-contact-cta">{t.common.contactCta}<ArrowRight size={16} /></Link>
+            <Link to="/standorte" className="gsf-link" data-testid="hero-locations-link">{t.common.toLocations}<ArrowRight size={16} /></Link>
           </div>
         </div>
       </section>
@@ -256,6 +243,6 @@ export default function Home() {
       </section>
 
       <ContactCTA />
-    </>
+    </div>
   );
 }

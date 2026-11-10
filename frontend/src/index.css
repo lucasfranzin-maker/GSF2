@@ -481,3 +481,6 @@
   .gsf-classic-actions { gap: 20px; }
 }
 @media (prefers-reduced-motion: reduce) { .gsf-classic-slide { transition: none; } }
+
+/* Keep complete partner marks visible at their original aspect ratio. */
+.gsf-classic-slide-logo img { object-fit: contain; padding: clamp(18px, 3vw, 40px); background: #fff; }
